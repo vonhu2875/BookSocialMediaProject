@@ -17,7 +17,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/hello").permitAll()   // ← thêm dòng này
+                        .requestMatchers("/api/hello").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
