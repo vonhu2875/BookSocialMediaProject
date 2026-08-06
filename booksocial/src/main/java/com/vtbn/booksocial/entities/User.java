@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -31,12 +33,26 @@ public class User extends BaseEntity{
     private String firstName;
     private String lastName;
     private String avatar;
-    private boolean isActive;
+    private boolean active;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Book> books;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Bookshelf> bookShelfs;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Rating> ratings;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Comment> comments;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<AIChatHistory> aiChatHistories;
 }
 
 

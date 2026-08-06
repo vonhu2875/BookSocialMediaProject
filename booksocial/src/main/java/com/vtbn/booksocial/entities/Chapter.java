@@ -1,8 +1,8 @@
 package com.vtbn.booksocial.entities;
 
 import jakarta.persistence.*;
-import jdk.jfr.Enabled;
 import lombok.*;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,4 +20,17 @@ public class Chapter extends BaseEntity{
     @Column(nullable = false)
     private String title;
     private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id")
+    private Book book;
+
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
+    private Set<Comment> comments;
+
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
+    private Set<AIChatHistory> aiChatHistories;
+
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
+    private Set<Quiz> quizzes;
 }

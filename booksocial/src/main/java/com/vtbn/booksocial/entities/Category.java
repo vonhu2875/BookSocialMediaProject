@@ -3,6 +3,8 @@ package com.vtbn.booksocial.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Set;
+
 @Entity
 @Getter
 @Setter
@@ -17,4 +19,6 @@ public class Category extends BaseEntity{
     @Column(nullable = false, unique = true)
     private String name;
     private String description;
+    @ManyToMany(mappedBy = "categories")
+    private Set<Book> books;
 }

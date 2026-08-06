@@ -3,6 +3,8 @@ package com.vtbn.booksocial.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Setter
 @Getter
@@ -16,4 +18,14 @@ public class UserAnswer {
     private int id;
     private String selectedAnswer;
     private boolean isCorrect;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
+
+    @ManyToOne
+    @JoinColumn(name = "quiz_attempt_id", nullable = false)
+    private QuizAttempt quizAttempt;
+
+
 }

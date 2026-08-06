@@ -20,7 +20,6 @@ public abstract class BaseEntity {
     private Instant createdDate;
 
     @LastModifiedDate
-    //Bỏ qua không điền cột này khi insert data
-    @Column(insertable = false)
+    @Column(nullable = false)
     private Instant updatedDate;
 }
