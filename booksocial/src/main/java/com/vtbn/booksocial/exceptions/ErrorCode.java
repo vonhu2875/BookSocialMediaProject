@@ -67,7 +67,19 @@ public enum ErrorCode {
     PASSWORD_INVALID_SIZE(1012, "Mật khẩu phải chứa ít nhất 6 ký tự", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_REQUIRED(1013, "Vui lòng nhập mật khẩu cũ", HttpStatus.BAD_REQUEST),
     NEW_PASSWORD_REQUIRED(1014, "Vui lòng nhập mật khẩu mới", HttpStatus.BAD_REQUEST),
-    CATEGORY_ALREADY_EXISTS(1015, "Danh mục đã tồn tại", HttpStatus.NOT_ACCEPTABLE)
+    CATEGORY_ALREADY_EXISTS(1015, "Danh mục đã tồn tại", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(
+            1016,
+            "Categoory not found",
+            HttpStatus.NOT_FOUND
+    ),
+    BOOK_ALREADY_EXISTS(1016, "Tiêu đề sách đã tồn tại", HttpStatus.BAD_REQUEST),
+    BOOK_NOT_FOUND(
+            1017,
+            "Book not found",
+            HttpStatus.NOT_FOUND
+    ),
+    INVALID_BOOK_STATUS(1018, "Book status invalid", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

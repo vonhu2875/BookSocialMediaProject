@@ -78,9 +78,11 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users", "/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users", "/categories", "/books/pending").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/categories/{id}", "/books/{id}/approve", "/books/{id}/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/categories/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/books").hasRole("READER")
                         // Các API còn lại phải đăng nhập
                         .anyRequest().authenticated()
                 )

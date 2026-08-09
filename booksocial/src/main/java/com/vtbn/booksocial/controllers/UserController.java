@@ -1,10 +1,13 @@
 package com.vtbn.booksocial.controllers;
 
+import com.cloudinary.Api;
 import com.vtbn.booksocial.dto.request.ChangePasswordRequest;
 import com.vtbn.booksocial.dto.request.UpdateProfileRequest;
 import com.vtbn.booksocial.dto.response.ApiResponse;
+import com.vtbn.booksocial.dto.response.BookListResponse;
 import com.vtbn.booksocial.dto.response.UserPublicResponse;
 import com.vtbn.booksocial.dto.response.UserResponse;
+import com.vtbn.booksocial.services.BookService;
 import com.vtbn.booksocial.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final BookService bookService;
 
     @GetMapping("/my-info")
     public ApiResponse<UserResponse> getMyInfo(Authentication authentication) {
@@ -53,5 +57,11 @@ public class UserController {
     public ApiResponse<Void> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
         return ApiResponse.<Void>builder().message("delete user success").build();
+    }
+
+    @GetMapping("/books")
+    public ApiResponse<Page<BookListResponse>> getMyBooks(Authentication authentication, Pageable pageable) {
+        Page<BookListResponse> bookListResponses = bookService.getMyBooks(authentication, pageable);
+        return ApiResponse.<Page<BookListResponse>>builder().result(bookListResponses).build();
     }
 }

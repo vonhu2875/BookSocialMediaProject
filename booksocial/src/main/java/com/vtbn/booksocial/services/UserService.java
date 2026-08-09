@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
-    User findByUserName(String username);
     UserResponse getInfoUser(String username);
     UserResponse updateInfoUser(String username, UpdateProfileRequest request);
     UserPublicResponse userPublicResponse(String username);

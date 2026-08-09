@@ -18,12 +18,4 @@ public class CategoryMapper {
             return null;
         return CategoryResponse.builder().id(category.getId()).name(category.getName()).description(category.getDescription()).build();
     }
-
-    public void updateCategory(Category category, CategoryRequest request) {
-        if (category == null || request == null) {
-            return;
-        }
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
-    }
 }

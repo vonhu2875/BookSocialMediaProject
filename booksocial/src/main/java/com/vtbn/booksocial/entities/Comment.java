@@ -27,7 +27,7 @@ public class Comment extends BaseEntity{
     @JoinColumn(name = "comment_parent_id")
     private Comment commentParent;
 
-    @OneToMany(mappedBy = "commentParent", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "commentParent", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments;
 
     @ManyToOne(fetch = FetchType.LAZY)

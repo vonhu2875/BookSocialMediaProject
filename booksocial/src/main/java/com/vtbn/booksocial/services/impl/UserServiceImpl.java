@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Lazy})
 public class UserServiceImpl implements UserService {
@@ -29,19 +27,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User findByUserName(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    @Override
     public UserResponse getInfoUser(String username) {
-        User user = findByUserName(username);
+        User user = userRepository.findByUsername(username);
         return userMapper.toResponse(user);
     }
 
     @Override
     public UserResponse updateInfoUser(String username, UpdateProfileRequest request) {
-        User user = findByUserName(username);
+        User user = userRepository.findByUsername(username);
         if(user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
@@ -59,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPublicResponse userPublicResponse(String username) {
-        User user = findByUserName(username);
+        User user = userRepository.findByUsername(username);
         if(user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
@@ -68,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(String username, ChangePasswordRequest request) {
-        User user = findByUserName(username);
+        User user = userRepository.findByUsername(username);
         if(user == null)
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword()))
@@ -80,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<UserResponse> getAllUser(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
-        return users.map(user -> userMapper.toResponse(user));
+        return users.map(userMapper::toResponse);
     }
 
     @Override

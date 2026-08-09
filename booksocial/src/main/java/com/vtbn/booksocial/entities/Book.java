@@ -42,10 +42,11 @@ public class Book extends BaseEntity{
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @OneToMany(mappedBy = "book",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book",fetch = FetchType.LAZY, cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Set<Bookshelf> bookShelfs;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Rating> ratings;
 
     @ManyToMany(fetch = FetchType.LAZY)

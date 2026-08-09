@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         String token = jwtService.generateToken(userDetails);
 
-        User user = userService.findByUserName(request.getUsername());
+        User user = userRepository.findByUsername(request.getUsername());
         UserResponse userResponse = userMapper.toResponse(user);
 
         return LoginResponse.builder().token(token).tokenType("Bearer").user(userResponse).build();
