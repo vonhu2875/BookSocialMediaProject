@@ -30,6 +30,6 @@ public class Question {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "question",  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "question")
     private Set<UserAnswer> userAnswers;
 }

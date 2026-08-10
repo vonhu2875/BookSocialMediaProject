@@ -1,10 +1,10 @@
 package com.vtbn.booksocial.controllers;
 
 import com.vtbn.booksocial.dto.request.BookRequest;
-import com.vtbn.booksocial.dto.response.ApiResponse;
-import com.vtbn.booksocial.dto.response.BookDetailResponse;
-import com.vtbn.booksocial.dto.response.BookListResponse;
+import com.vtbn.booksocial.dto.request.ChapterRequest;
+import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.BookService;
+import com.vtbn.booksocial.services.ChapterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +18,8 @@ import java.util.List;
 @RequestMapping(("/books"))
 public class BookController {
     private final BookService bookService;
+    private final ChapterService chapterService;
+
     @PostMapping
     public ApiResponse<BookListResponse> createBook(Authentication authentication, @ModelAttribute BookRequest request) {
         BookListResponse bookListResponse = bookService.createBook(authentication, request);
@@ -67,6 +69,21 @@ public class BookController {
         bookService.rejectBook(id);
         return ApiResponse.<Void>builder().message("Rejected book success").build();
     }
+
+    //CHAPTER
+    @PostMapping("/{bookId}/chapters")
+    public ApiResponse<ChapterDetailResponse> createChapter(Authentication authentication, @PathVariable int bookId, @ModelAttribute ChapterRequest request){
+        ChapterDetailResponse chapterDetailResponse = chapterService.createChapter(authentication, bookId, request);
+        return ApiResponse.<ChapterDetailResponse>builder().result(chapterDetailResponse).build();
+    }
+
+    @GetMapping("/{bookId}/chapters")
+    public ApiResponse<Page<ChapterListResponse>> getChapters(@PathVariable int bookId, Pageable pageable){
+            Page<ChapterListResponse> chapterListResponses = chapterService.getChapters(bookId, pageable);
+            return ApiResponse.<Page<ChapterListResponse>>builder().result(chapterListResponses).build();
+    }
+
+
 
 
 

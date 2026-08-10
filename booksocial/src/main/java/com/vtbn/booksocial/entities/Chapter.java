@@ -10,7 +10,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name="chapters")
+@Table(name="chapters", uniqueConstraints = {@UniqueConstraint(columnNames = {"book_id", "chapter_number"})})
 public class Chapter extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +19,18 @@ public class Chapter extends BaseEntity{
     private int chapterNumber;
     @Column(nullable = false)
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
+    @Column(columnDefinition = "TEXT")
+    private String summary;
+    private String fileUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)

@@ -43,7 +43,6 @@ public class BookSpecification {
                 if (keyword == null || keyword.trim().isEmpty()) {
                     return null;
                 }
-
                 Expression<String> title =
                         criteriaBuilder.function(
                                 "unaccent",
@@ -51,9 +50,7 @@ public class BookSpecification {
                                 root.get("title")
                         );
 
-                Expression<String> normalizedTitle =
-                        criteriaBuilder.lower(title);
-
+                Expression<String> normalizedTitle = criteriaBuilder.lower(title);
                 Expression<String> normalizedKeyword =
                         criteriaBuilder.function(
                                 "unaccent",
@@ -76,4 +73,3 @@ public class BookSpecification {
             };
         };
     }
-
