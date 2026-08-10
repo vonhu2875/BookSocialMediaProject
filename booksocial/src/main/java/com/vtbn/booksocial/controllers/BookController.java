@@ -2,9 +2,12 @@ package com.vtbn.booksocial.controllers;
 
 import com.vtbn.booksocial.dto.request.BookRequest;
 import com.vtbn.booksocial.dto.request.ChapterRequest;
+import com.vtbn.booksocial.dto.request.RatingRequest;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.BookService;
 import com.vtbn.booksocial.services.ChapterService;
+import com.vtbn.booksocial.services.RatingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,7 @@ import java.util.List;
 public class BookController {
     private final BookService bookService;
     private final ChapterService chapterService;
+    private final RatingService ratingService;
 
     @PostMapping
     public ApiResponse<BookListResponse> createBook(Authentication authentication, @ModelAttribute BookRequest request) {
@@ -83,8 +87,25 @@ public class BookController {
             return ApiResponse.<Page<ChapterListResponse>>builder().result(chapterListResponses).build();
     }
 
-
-
-
-
+    //RATING
+    @PostMapping("/{bookId}/ratings")
+    public ApiResponse<RatingDetailResponse> createRating(Authentication authentication,@PathVariable int bookId,@Valid @RequestBody RatingRequest request) {
+        RatingDetailResponse ratingDetailResponse = ratingService.createRating(authentication,bookId,request);
+        return ApiResponse.<RatingDetailResponse>builder().result(ratingDetailResponse).build();
+    }
+    @GetMapping("/{bookId}/ratings")
+    public ApiResponse<List<RatingListResponse>> getRatingsByBook(@PathVariable int bookId) {
+        List<RatingListResponse> ratingListResponses = ratingService.getRatingsByBook(bookId);
+        return ApiResponse.<List<RatingListResponse>>builder().result(ratingListResponses).build();
+    }
+    @GetMapping("/{bookId}/ratings/myself")
+    public ApiResponse<RatingDetailResponse> getMyRating(Authentication authentication,@PathVariable int bookId) {
+        RatingDetailResponse ratingDetailResponse = ratingService.getMyRating(authentication,bookId);
+        return ApiResponse.<RatingDetailResponse>builder().result(ratingDetailResponse).build();
+    }
+    @GetMapping("/{bookId}/ratings/summary")
+    public ApiResponse<RatingSummaryResponse> getRatingSummary(@PathVariable int bookId) {
+        RatingSummaryResponse ratingSummaryResponse = ratingService.getRatingSummary(bookId);
+        return ApiResponse.<RatingSummaryResponse>builder().result(ratingSummaryResponse).build();
+    }
 }

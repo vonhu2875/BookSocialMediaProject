@@ -87,6 +87,9 @@ public enum ErrorCode {
     UPLOAD_FILE_ERROR(1028,"Upload file error",HttpStatus.INTERNAL_SERVER_ERROR),
     COMMENT_NOT_FOUND(1029, "Comment not found", HttpStatus.NOT_FOUND),
     COMMENT_REPLY_NOT_ALLOWED(1030,"Cannot reply to a reply",HttpStatus.BAD_REQUEST),
+    RATING_ALREADY_EXISTS(1031,"Rating already exists",HttpStatus.BAD_REQUEST),
+    RATING_NOT_FOUND(1032,"Rating not found",HttpStatus.NOT_FOUND),
+    STAR_INVALID(1031,"Số sao phải từ 1 đến 5",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
