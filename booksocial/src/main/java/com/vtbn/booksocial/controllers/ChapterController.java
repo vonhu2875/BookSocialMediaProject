@@ -2,12 +2,10 @@ package com.vtbn.booksocial.controllers;
 
 import com.vtbn.booksocial.dto.request.ChapterRequest;
 import com.vtbn.booksocial.dto.request.CommentRequest;
-import com.vtbn.booksocial.dto.response.ApiResponse;
-import com.vtbn.booksocial.dto.response.ChapterDetailResponse;
-import com.vtbn.booksocial.dto.response.CommentDetailResponse;
-import com.vtbn.booksocial.dto.response.CommentListResponse;
+import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.ChapterService;
 import com.vtbn.booksocial.services.CommentService;
+import com.vtbn.booksocial.services.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -21,7 +19,7 @@ import java.util.List;
 public class ChapterController {
     private final ChapterService chapterService;
     private final CommentService commentService;
-
+    private final QuizService quizService;
     @GetMapping("/{chapterId}")
     public ApiResponse<ChapterDetailResponse> getChapter(@PathVariable int chapterId) {
         ChapterDetailResponse chapter = chapterService.getChapter(chapterId);
@@ -51,4 +49,30 @@ public class ChapterController {
 
         return ApiResponse.<List<CommentListResponse>>builder().result(responses).build();
     }
+
+    @PostMapping("/{chapterId}/summary")
+    public ApiResponse<ChapterSummaryResponse> summarizeChapter(Authentication authentication,@PathVariable int chapterId) {
+        ChapterSummaryResponse response = chapterService.summaryChapter(authentication, chapterId);
+        return ApiResponse.<ChapterSummaryResponse>builder().result(response).build();
+    }
+
+    //Quizz
+    @PostMapping("/{chapterId}/quizzes")
+    public ApiResponse<QuizDetailResponse> generateQuiz(@PathVariable int chapterId) {
+        QuizDetailResponse quizDetailResponse = quizService.generateQuiz(chapterId);
+        return ApiResponse.<QuizDetailResponse>builder().result(quizDetailResponse).build();
+    }
+
+    @PostMapping("/{chapterId}/quizzes/start")
+    public ApiResponse<QuizDetailResponse> startQuiz(Authentication authentication,@PathVariable int chapterId) {
+        QuizDetailResponse response = quizService.startQuiz(authentication, chapterId);
+        return ApiResponse.<QuizDetailResponse>builder().result(response).build();
+    }
+
+    @GetMapping("/{chapterId}/quizzes")
+    public ApiResponse<List<QuizListResponse>> getQuizzesByChapter(@PathVariable int chapterId) {
+        List<QuizListResponse> responses = quizService.getQuizzesByChapter(chapterId);
+        return ApiResponse.<List<QuizListResponse>>builder().result(responses).build();
+    }
+
 }

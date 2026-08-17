@@ -3,8 +3,10 @@ package com.vtbn.booksocial.controllers;
 import com.vtbn.booksocial.dto.request.BookRequest;
 import com.vtbn.booksocial.dto.request.ChapterRequest;
 import com.vtbn.booksocial.dto.request.RatingRequest;
+import com.vtbn.booksocial.dto.request.ReadingProgressRequest;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.BookService;
+import com.vtbn.booksocial.services.BookshelfService;
 import com.vtbn.booksocial.services.ChapterService;
 import com.vtbn.booksocial.services.RatingService;
 import jakarta.validation.Valid;
@@ -23,7 +25,7 @@ public class BookController {
     private final BookService bookService;
     private final ChapterService chapterService;
     private final RatingService ratingService;
-
+    private final BookshelfService bookshelfService;
     @PostMapping
     public ApiResponse<BookListResponse> createBook(Authentication authentication, @ModelAttribute BookRequest request) {
         BookListResponse bookListResponse = bookService.createBook(authentication, request);
@@ -107,5 +109,44 @@ public class BookController {
     public ApiResponse<RatingSummaryResponse> getRatingSummary(@PathVariable int bookId) {
         RatingSummaryResponse ratingSummaryResponse = ratingService.getRatingSummary(bookId);
         return ApiResponse.<RatingSummaryResponse>builder().result(ratingSummaryResponse).build();
+    }
+
+    //Bookshelf
+    @PostMapping("{bookId}/bookshelfs")
+    public ApiResponse<BookshelfResponse> addToBookshelf(Authentication authentication,@PathVariable int bookId) {
+        BookshelfResponse response =
+                bookshelfService.addToBookshelf(
+                        authentication,
+                        bookId
+                );
+
+        return ApiResponse.<BookshelfResponse>builder()
+                .result(response)
+                .build();
+    }
+
+    @DeleteMapping("/{bookId}/bookshelfs")
+    public ApiResponse<Void> removeFromBookshelf(
+            Authentication authentication,
+            @PathVariable int bookId
+    ) {
+
+        bookshelfService.deleteBookshelf(
+                authentication,
+                bookId
+        );
+
+        return ApiResponse.<Void>builder()
+                .message("delete bookshelf success")
+                .build();
+    }
+
+    @PutMapping("/{bookId}/bookshelfs/progress")
+    public ApiResponse<Void> updateReadingProgress(Authentication authentication,@PathVariable int bookId,@RequestBody ReadingProgressRequest request) {
+        bookshelfService.updateReadingProgress(authentication,bookId,request);
+
+        return ApiResponse.<Void>builder()
+                .message("Update reading progress success")
+                .build();
     }
 }

@@ -2,7 +2,14 @@ package com.vtbn.booksocial.repositories;
 
 import com.vtbn.booksocial.entities.QuizAttempt;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface QuizAttemptRepository
-        extends JpaRepository<QuizAttempt, Integer> {
+import java.util.List;
+
+@Repository
+public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Integer> {
+    boolean existsByQuizIdAndUserId(int quizId, int userId);
+    boolean existsByQuizId(int quizId);
+    QuizAttempt findById(int id);
+    List<QuizAttempt> findByQuizIdAndUserId(int quizId, int userId);
 }

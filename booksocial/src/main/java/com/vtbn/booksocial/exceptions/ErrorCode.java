@@ -90,6 +90,24 @@ public enum ErrorCode {
     RATING_ALREADY_EXISTS(1031,"Rating already exists",HttpStatus.BAD_REQUEST),
     RATING_NOT_FOUND(1032,"Rating not found",HttpStatus.NOT_FOUND),
     STAR_INVALID(1031,"Số sao phải từ 1 đến 5",HttpStatus.BAD_REQUEST),
+    CHAPTER_SUMMARY_GENERATION_FAILED(1032, "Chapter summary generation failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    GENERATE_QUIZ_FAILED(1033, "Generate quiz failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    CHAPTER_SUMMARY_NOT_FOUND(1034, "Chapter summary not found", HttpStatus.NOT_FOUND),
+    GENERATE_SUMMARY_FAILED(1035, "generate summary failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    QUIZ_NOT_FOUND(1036, "Quiz not found", HttpStatus.NOT_FOUND),
+    QUESTION_NOT_FOUND(1037, "Question not found", HttpStatus.NOT_FOUND),
+    QUIZ_HAS_NO_QUESTIONS(1038, "Quiz has no question", HttpStatus.INTERNAL_SERVER_ERROR),
+    ANSWER_REQUIRED(1039, "Answer required", HttpStatus.BAD_REQUEST),
+    ANSWER_NOT_COMPLETE(1040, "Answer not complete", HttpStatus.BAD_REQUEST),
+    DUPLICATE_QUESTION(1041, "Duplicate question", HttpStatus.BAD_REQUEST),
+    INVALID_ANSWER(1042, "Invalid answer", HttpStatus.BAD_REQUEST),
+    QUESTION_NOT_IN_QUIZ(1043, "Question not in quiz", HttpStatus.BAD_REQUEST),
+    QUIZ_ALREADY_ATTEMPTED(1044, "Quiz already attempted", HttpStatus.BAD_REQUEST),
+    QUIZ_ATTEMPT_NOT_FOUND(1045, "Quiz attempt not foung", HttpStatus.NOT_FOUND),
+    BOOK_ALREADY_IN_BOOKSHELF(1046, "Book already in bookshelf", HttpStatus.BAD_REQUEST),
+    BOOK_NOT_IN_BOOKSHELF(1047, "Book not in bookshelf", HttpStatus.BAD_REQUEST),
+    CHAPTER_NOT_IN_BOOK(1048, "Chapter not in book", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

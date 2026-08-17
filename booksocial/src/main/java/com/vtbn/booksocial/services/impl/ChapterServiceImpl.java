@@ -3,6 +3,7 @@ package com.vtbn.booksocial.services.impl;
 import com.vtbn.booksocial.dto.request.ChapterRequest;
 import com.vtbn.booksocial.dto.response.ChapterDetailResponse;
 import com.vtbn.booksocial.dto.response.ChapterListResponse;
+import com.vtbn.booksocial.dto.response.ChapterSummaryResponse;
 import com.vtbn.booksocial.entities.Book;
 import com.vtbn.booksocial.entities.Bookshelf;
 import com.vtbn.booksocial.entities.Chapter;
@@ -15,6 +16,7 @@ import com.vtbn.booksocial.repositories.BookRepository;
 import com.vtbn.booksocial.repositories.BookshelfRepository;
 import com.vtbn.booksocial.repositories.ChapterRepository;
 import com.vtbn.booksocial.repositories.UserRepository;
+import com.vtbn.booksocial.services.AIService;
 import com.vtbn.booksocial.services.ChapterFileService;
 import com.vtbn.booksocial.services.ChapterService;
 import com.vtbn.booksocial.services.CloudinaryService;
@@ -37,7 +39,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterFileService chapterFileService;
     private final CloudinaryService cloudinaryService;
     private final BookshelfRepository bookshelfRepository;
-
+    private final AIService aiService;
     @Override
 //    Nếu Chapter save thành công nhưng Book update thất bại thì transaction sẽ rollback.
     @Transactional
@@ -195,5 +197,37 @@ public class ChapterServiceImpl implements ChapterService {
         if (fileUrl != null && !fileUrl.isBlank()) {
             cloudinaryService.deleteFile(fileUrl);
         }
+    }
+
+
+    @Override
+    @Transactional
+    public ChapterSummaryResponse summaryChapter(Authentication authentication, int chapterId) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        Chapter chapter = chapterRepository.findById(chapterId);
+
+        if (chapter == null)
+            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
+        if (chapter.getContent() == null || chapter.getContent().isBlank())
+            throw new AppException(ErrorCode.CHAPTER_CONTENT_EMPTY);
+        // Nếu chapter đã có summary thì sử dụng lại
+        if (chapter.getSummary() != null && !chapter.getSummary().isBlank()) {
+            return chapterMapper.toChapterSummaryResponse(chapter);
+        }
+        String summary = aiService.summaryChapter(chapter.getContent());
+
+        if (summary == null || summary.isBlank()) {
+            throw new AppException(ErrorCode.CHAPTER_SUMMARY_GENERATION_FAILED);
+        }
+
+        chapter.setSummary(summary);
+
+        chapterRepository.save(chapter);
+
+        return chapterMapper.toChapterSummaryResponse(chapter);
     }
 }

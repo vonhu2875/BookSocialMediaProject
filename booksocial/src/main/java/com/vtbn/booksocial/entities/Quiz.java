@@ -3,6 +3,8 @@ package com.vtbn.booksocial.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,7 +18,7 @@ public class Quiz extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String summary;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,8 +26,8 @@ public class Quiz extends BaseEntity{
     private Chapter chapter;
 
     @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<QuizAttempt> quizAttempts;
+    private List<QuizAttempt> quizAttempts;
 
     @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Question> questions;
+    private List<Question> questions;
 }
