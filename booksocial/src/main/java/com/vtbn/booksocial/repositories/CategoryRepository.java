@@ -2,9 +2,11 @@ package com.vtbn.booksocial.repositories;
 
 import com.vtbn.booksocial.entities.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
     boolean existsByName(String name);
     Category findById(int id);

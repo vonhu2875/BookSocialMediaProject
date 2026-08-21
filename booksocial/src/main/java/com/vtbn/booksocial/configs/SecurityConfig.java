@@ -30,7 +30,6 @@ public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -83,8 +82,11 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users", "/categories", "/books/pending").hasRole("ADMIN")
+                                "/auth/**",
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                                ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users", "/books/pending").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categories/{id}", "/books/{id}/approve", "/books/{id}/reject").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/categories/{id}", "/quizzes/{quizId}").hasRole("ADMIN")

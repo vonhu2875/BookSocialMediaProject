@@ -20,5 +20,6 @@ public class BookListResponse {
     private int viewCount;
     private int authorId;
     private String authorUsername;
+    private int totalChapters;
     private List<CategoryResponse> categories;
 }

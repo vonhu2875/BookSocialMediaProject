@@ -2,10 +2,7 @@ package com.vtbn.booksocial.configs;
 
 
 import com.vtbn.booksocial.entities.*;
-import com.vtbn.booksocial.enums.BookLanguage;
-import com.vtbn.booksocial.enums.BookStatus;
-import com.vtbn.booksocial.enums.BookshelfStatus;
-import com.vtbn.booksocial.enums.UserRole;
+import com.vtbn.booksocial.enums.*;
 import com.vtbn.booksocial.repositories.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +48,7 @@ public class ApplicationInitConfig {
                         .lastName("Nhu")
                         .email("vonhu2875@gmail.com")
                         .active(true)
+                        .provider(AuthProvider.LOCAL)
                         .build();
 
                 userRepository.save(user);
@@ -73,6 +71,7 @@ public class ApplicationInitConfig {
                         .avatar("https://res.cloudinary.com/demo/image/upload/v1/author_nhatanh.png")
                         .active(true)
                         .role(UserRole.READER)
+                        .provider(AuthProvider.LOCAL)
                         .build();
 
                 User author2 = User.builder()
@@ -84,6 +83,7 @@ public class ApplicationInitConfig {
                         .avatar("https://res.cloudinary.com/demo/image/upload/v1/author_dothi.png")
                         .active(true)
                         .role(UserRole.READER)
+                        .provider(AuthProvider.LOCAL)
                         .build();
 
                 User reader1 = User.builder()
@@ -95,6 +95,7 @@ public class ApplicationInitConfig {
                         .avatar("https://res.cloudinary.com/demo/image/upload/v1/avatar_reader1.png")
                         .active(true)
                         .role(UserRole.READER)
+                        .provider(AuthProvider.LOCAL)
                         .build();
 
                 User reader2 = User.builder()
@@ -106,6 +107,7 @@ public class ApplicationInitConfig {
                         .avatar("https://res.cloudinary.com/demo/image/upload/v1/avatar_reader2.png")
                         .active(true)
                         .role(UserRole.READER)
+                        .provider(AuthProvider.LOCAL)
                         .build();
 
                 userRepository.saveAll(List.of(author1, author2, reader1, reader2));
@@ -131,6 +133,7 @@ public class ApplicationInitConfig {
                         .approvedAt(Instant.now())
                         .author(author1)
                         .categories(Set.of(cat1, cat2))
+
                         .build();
 
                 Book book2 = Book.builder()

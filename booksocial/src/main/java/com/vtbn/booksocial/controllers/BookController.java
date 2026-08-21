@@ -40,6 +40,11 @@ public class BookController {
         Page<BookListResponse> bookResponses= bookService.getBooks(categoryIds, authorId, keyword, pageable);
         return ApiResponse.<Page<BookListResponse>>builder().result(bookResponses).build();
     }
+    @GetMapping("/pending")
+    public ApiResponse<Page<BookListResponse>> getPendingBooks(Pageable pageable) {
+        Page<BookListResponse> books = bookService.getPendingBooks(pageable);
+        return ApiResponse.<Page<BookListResponse>>builder().result(books).build();
+    }
 
     @GetMapping("/{id}")
     public ApiResponse<BookDetailResponse> getBook(@PathVariable int id) {
@@ -59,11 +64,7 @@ public class BookController {
         return ApiResponse.<Void>builder().message("Delete book success").build();
     }
 
-    @GetMapping("/pending")
-    public ApiResponse<Page<BookListResponse>> getPendingBooks(Pageable pageable) {
-        Page<BookListResponse> books = bookService.getPendingBooks(pageable);
-        return ApiResponse.<Page<BookListResponse>>builder().result(books).build();
-    }
+
 
     @PutMapping("/{id}/approve")
     public ApiResponse<Void> approveBook(@PathVariable int id) {
@@ -112,7 +113,7 @@ public class BookController {
     }
 
     //Bookshelf
-    @PostMapping("{bookId}/bookshelfs")
+    @PostMapping("/{bookId}/bookshelfs")
     public ApiResponse<BookshelfResponse> addToBookshelf(Authentication authentication,@PathVariable int bookId) {
         BookshelfResponse response =
                 bookshelfService.addToBookshelf(

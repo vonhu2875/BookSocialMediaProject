@@ -73,6 +73,7 @@ public class BookMapper {
                                 .map(categoryMapper::toCategoryResponse)
                                 .toList()
                 )
+                .totalChapters(book.getTotalChapters())
                 .build();
     }
 }

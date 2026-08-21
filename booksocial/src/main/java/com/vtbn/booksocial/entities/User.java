@@ -1,5 +1,6 @@
 package com.vtbn.booksocial.entities;
 
+import com.vtbn.booksocial.enums.AuthProvider;
 import com.vtbn.booksocial.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -25,11 +26,12 @@ public class User extends BaseEntity{
 
     @Column(nullable = false, unique = true)
     private String username;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
     @Column(nullable = false, unique = true)
     private String email;
+
     private String firstName;
     private String lastName;
     private String avatar;
@@ -38,6 +40,10 @@ public class User extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private Set<Book> books;

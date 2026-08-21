@@ -1,5 +1,6 @@
 package com.vtbn.booksocial.controllers;
 
+import com.vtbn.booksocial.dto.request.GoogleLoginRequest;
 import com.vtbn.booksocial.dto.request.LoginRequest;
 import com.vtbn.booksocial.dto.request.RegisterRequest;
 import com.vtbn.booksocial.dto.response.ApiResponse;
@@ -8,11 +9,7 @@ import com.vtbn.booksocial.dto.response.UserResponse;
 import com.vtbn.booksocial.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,5 +32,10 @@ public class AuthController {
     public ApiResponse<String> logout(@RequestHeader("Authorization") String authHeader) {
         authService.logout(authHeader);
         return ApiResponse.<String>builder().result("Logout Success").build();
+    }
+    @PostMapping("/google")
+    public ApiResponse<LoginResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        var result = authService.googleLogin(request);
+        return ApiResponse.<LoginResponse>builder().result(result).build();
     }
 }
