@@ -8,6 +8,8 @@ import com.vtbn.booksocial.services.CommentService;
 import com.vtbn.booksocial.services.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,10 +46,10 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapterId}/comments")
-    public ApiResponse<List<CommentListResponse>> getComments(@PathVariable int chapterId) {
-        List<CommentListResponse> responses = commentService.getCommentsByChapter(chapterId);
+    public ApiResponse<Page<CommentListResponse>> getComments(@PathVariable int chapterId, Pageable pageable) {
+        Page<CommentListResponse> responses = commentService.getCommentsByChapter(chapterId, pageable);
 
-        return ApiResponse.<List<CommentListResponse>>builder().result(responses).build();
+        return ApiResponse.<Page<CommentListResponse>>builder().result(responses).build();
     }
 
     @PostMapping("/{chapterId}/summary")

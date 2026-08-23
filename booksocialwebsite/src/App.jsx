@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import BookDetail from './pages/BookDetail';
+import ChapterView from './pages/ChapterView';
 
 // Layout dùng chung cho các trang yêu cầu đăng nhập
 function MainLayout() {
@@ -38,7 +39,7 @@ export default function App() {
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/books/:id" element={<BookDetail />} />
-              <Route path="/chapters/:chapterId" element={<div className="p-8 font-bold text-center">Đọc chương sách</div>} />
+              <Route path="/chapters/:chapterId" element={<ChapterView />} />
               <Route path="/bookshelfs" element={<div className="p-8 font-bold text-center">Tủ sách cá nhân</div>} />
               <Route path="/profile" element={<div className="p-8 font-bold text-center">Trang cá nhân</div>} />
             </Route>

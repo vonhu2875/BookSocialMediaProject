@@ -28,6 +28,7 @@ export const bookService = {
   createBook: (formData) => api.post('/books', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   updateBook: (id, formData) => api.put(`/books/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   deleteBook: (id) => api.delete(`/books/${id}`),
+  increaseViewCount: (bookId) => api.post(`/books/${bookId}/view`),
   
   // Admin Books
   getPendingBooks: (page = 0, size = 10) => api.get(`/books/pending?page=${page}&size=${size}`),
@@ -36,6 +37,7 @@ export const bookService = {
 
   // Chapters
   getChapters: (bookId, page = 0, size = 20) => api.get(`/books/${bookId}/chapters?page=${page}&size=${size}`),
+  getChapterByBookId: (bookId) => api.get(`/books/${bookId}/chapters`),
   createChapter: (bookId, formData) => api.post(`/books/${bookId}/chapters`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   
   // Ratings & Bookshelf
@@ -53,7 +55,7 @@ export const bookService = {
 export const chapterService = {
   getDetail: (chapterId) => api.get(`/chapters/${chapterId}`),
   summarize: (chapterId) => api.post(`/chapters/${chapterId}/summary`),
-  getComments: (chapterId) => api.get(`/chapters/${chapterId}/comments`),
+  getComments: (chapterId, page = 0, size = 10) => api.get(`/chapters/${chapterId}/comments?page=${page}&size=${size}`),
   addComment: (chapterId, data) => api.post(`/chapters/${chapterId}/comments`, data),
   generateQuiz: (chapterId) => api.post(`/chapters/${chapterId}/quizzes`),
 };

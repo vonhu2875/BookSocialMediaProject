@@ -14,6 +14,8 @@ import com.vtbn.booksocial.repositories.ChapterRepository;
 import com.vtbn.booksocial.repositories.CommentRepository;
 import com.vtbn.booksocial.repositories.UserRepository;
 import com.vtbn.booksocial.services.CommentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentListResponse> getCommentsByChapter(int chapterId) {
+    public Page<CommentListResponse> getCommentsByChapter(int chapterId, Pageable pageable) {
         // Kiểm tra chapter tồn tại
         Chapter chapter = chapterRepository.findById(chapterId);
 
@@ -73,11 +75,9 @@ public class CommentServiceImpl implements CommentService {
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         }
 
-        List<Comment> comments = commentRepository.findByChapterIdOrderByCreatedDateAsc(chapterId);
+        Page<Comment> comments = commentRepository.findByChapterIdOrderByCreatedDateDesc(chapterId, pageable);
 
-        return comments.stream()
-                .map(commentMapper::toCommentListResponse)
-                .toList();
+        return comments.map(commentMapper::toCommentListResponse);
     }
 
     @Override

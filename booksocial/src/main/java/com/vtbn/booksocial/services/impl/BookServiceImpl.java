@@ -178,4 +178,14 @@ public class BookServiceImpl implements BookService {
         bookRepository.save(book);
     }
 
+    @Override
+    public void increaseViewCount(int id) {
+        Book book = bookRepository.findById(id);
+        if (book == null) {
+            throw new AppException(ErrorCode.BOOK_NOT_FOUND);
+        }
+        book.setViewCount(book.getViewCount() + 1);
+        bookRepository.save(book);
+    }
+
 }

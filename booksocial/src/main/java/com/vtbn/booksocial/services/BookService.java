@@ -19,5 +19,5 @@ public interface BookService {
     Page<BookListResponse> getPendingBooks(Pageable pageable);
     void approveBook(int id);
     void rejectBook(int id);
-
+    void increaseViewCount(int id);
 }

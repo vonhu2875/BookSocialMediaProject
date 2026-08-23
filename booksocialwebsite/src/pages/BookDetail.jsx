@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { bookService, authService } from '../services/apiServices';
 import ChapterList from '../components/ChapterList';
 import RatingSection from '../components/RatingSection';
@@ -21,31 +21,35 @@ import {
 export default function BookDetail() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
+  const [chapters, setChapters] = useState([]); // State lưu danh sách chương
   const [ratingSummary, setRatingSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('chapters');
   const [copied, setCopied] = useState(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchBookDetailData = async () => {
       setLoading(true);
       try {
-        const [bookRes, summaryRes] = await Promise.all([
+        const [bookRes, summaryRes, chapterRes] = await Promise.all([
           bookService.getBookDetail(id),
           bookService.getRatingSummary(id).catch(() => null),
+          bookService.getChapterByBookId(id).catch(() => null), // Gọi thêm API danh sách chương
         ]);
 
         const bookData = bookRes?.data?.result || bookRes?.result || bookRes;
         const sumData = summaryRes?.data?.result || summaryRes?.result || summaryRes;
+        const chapData = chapterRes?.data?.result || chapterRes?.result || chapterRes?.content || [];
 
         setBook(bookData);
         setRatingSummary(sumData);
+        setChapters(Array.isArray(chapData) ? chapData : []);
 
         try {
           const shelfRes = await authService.getMyBookshelf();
-          const shelfData = shelfRes?.data?.result || shelfRes?.result || shelfRes;
+          const shelfData = shelfRes?.data?.result || shelfRes?.result || shelfRes || [];
           if (Array.isArray(shelfData)) {
             const found = shelfData.some((item) => item.bookId === Number(id) || item.id === Number(id));
             setIsSaved(found);
@@ -80,6 +84,15 @@ export default function BookDetail() {
     }
   };
 
+  const handleReadFromStart = async () => {
+      try {
+          await bookService.increaseViewCount(book.id);
+      } catch (error) {
+          console.error("Không thể tăng lượt xem:", error);
+      }
+      navigate(`/chapters/${firstChapterId}`);
+  };
+
   // Thao tác Copy Link Chia sẻ
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -104,6 +117,10 @@ export default function BookDetail() {
       </div>
     );
   }
+
+  // Lấy ID chương đầu tiên
+  const firstChapter = chapters && chapters.length > 0 ? chapters[0] : null;
+  const firstChapterId = firstChapter ? (firstChapter.id || firstChapter.chapterId) : book?.firstChapterId;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6">
@@ -162,12 +179,23 @@ export default function BookDetail() {
           {/* Cụm Nút Thao Tác */}
           <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
             {/* Nút Đọc từ đầu */}
-            <Link
-              to={`/books/${id}/chapters/${book.firstChapterId || 1}`}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition duration-300 hover:scale-105"
-            >
-              <Play className="w-4 h-4 fill-white" /> Đọc từ đầu
-            </Link>
+            {firstChapterId ? (
+              <button
+                  onClick={handleReadFromStart}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition duration-300 hover:scale-105"
+              >
+                  <Play className="w-4 h-4 fill-white" />
+                  Đọc từ đầu
+              </button>
+          ) : (
+              <button
+                  disabled
+                  className="px-6 py-3 bg-slate-800 text-slate-500 font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 cursor-not-allowed opacity-60"
+              >
+                  <Play className="w-4 h-4 fill-slate-500" />
+                  Chưa có chương
+              </button>
+          )}
 
             {/* Nút Thêm / Bỏ lưu Tủ sách */}
             <button
@@ -219,7 +247,7 @@ export default function BookDetail() {
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            MỤC LỤC CHƯƠNG ({book.totalChapters || 0})
+            MỤC LỤC CHƯƠNG ({chapters.length || book.totalChapters || 0})
           </button>
           <button
             onClick={() => setActiveTab('ratings')}

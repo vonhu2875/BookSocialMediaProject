@@ -131,9 +131,14 @@ public class BookshelfServiceImpl implements BookshelfService {
                 );
 
         if (bookshelf == null) {
-            throw new AppException(
-                    ErrorCode.BOOK_NOT_IN_BOOKSHELF
-            );
+            Book book = bookRepository.findById(bookId);
+
+            if (book == null) {
+                throw new AppException(ErrorCode.BOOK_NOT_FOUND);
+            }
+            bookshelf = Bookshelf.builder().user(user).book(book).status(BookshelfStatus.READING).isFavorite(false).lastReadChapter(null).build();
+            // 5. Lưu database
+            bookshelfRepository.save(bookshelf);
         }
 
         // 3. Tìm chapter
@@ -176,7 +181,6 @@ public class BookshelfServiceImpl implements BookshelfService {
             bookshelf.setStatus(BookshelfStatus.COMPLETED);
 
         } else if (bookshelf.getStatus() != BookshelfStatus.COMPLETED) {
-
             bookshelf.setStatus(BookshelfStatus.READING);
         }
 

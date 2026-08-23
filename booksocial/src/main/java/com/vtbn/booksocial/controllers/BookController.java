@@ -150,4 +150,12 @@ public class BookController {
                 .message("Update reading progress success")
                 .build();
     }
+
+    @PostMapping("/{id}/view")
+    public ApiResponse<Void> increaseViewCount(@PathVariable int id) {
+        bookService.increaseViewCount(id);
+        return ApiResponse.<Void>builder()
+                .message("View count increased")
+                .build();
+    }
 }
