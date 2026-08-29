@@ -1,21 +1,15 @@
 package com.vtbn.booksocial.services.impl;
 
 import com.vtbn.booksocial.dto.request.ChapterRequest;
-import com.vtbn.booksocial.dto.response.ChapterDetailResponse;
-import com.vtbn.booksocial.dto.response.ChapterListResponse;
-import com.vtbn.booksocial.dto.response.ChapterSummaryResponse;
-import com.vtbn.booksocial.entities.Book;
-import com.vtbn.booksocial.entities.Bookshelf;
-import com.vtbn.booksocial.entities.Chapter;
-import com.vtbn.booksocial.entities.User;
+import com.vtbn.booksocial.dto.request.ChatRequest;
+import com.vtbn.booksocial.dto.response.*;
+import com.vtbn.booksocial.entities.*;
 import com.vtbn.booksocial.enums.UserRole;
 import com.vtbn.booksocial.exceptions.AppException;
 import com.vtbn.booksocial.exceptions.ErrorCode;
+import com.vtbn.booksocial.mappers.AIChatHistoryMapper;
 import com.vtbn.booksocial.mappers.ChapterMapper;
-import com.vtbn.booksocial.repositories.BookRepository;
-import com.vtbn.booksocial.repositories.BookshelfRepository;
-import com.vtbn.booksocial.repositories.ChapterRepository;
-import com.vtbn.booksocial.repositories.UserRepository;
+import com.vtbn.booksocial.repositories.*;
 import com.vtbn.booksocial.services.AIService;
 import com.vtbn.booksocial.services.ChapterFileService;
 import com.vtbn.booksocial.services.ChapterService;
@@ -39,7 +33,9 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterFileService chapterFileService;
     private final CloudinaryService cloudinaryService;
     private final BookshelfRepository bookshelfRepository;
+    private final AIChatHistoryRepository aiChatHistoryRepository;
     private final AIService aiService;
+    private final AIChatHistoryMapper aiChatHistoryMapper;
     @Override
 //    Nếu Chapter save thành công nhưng Book update thất bại thì transaction sẽ rollback.
     @Transactional
@@ -229,5 +225,46 @@ public class ChapterServiceImpl implements ChapterService {
         chapterRepository.save(chapter);
 
         return chapterMapper.toChapterSummaryResponse(chapter);
+    }
+
+    @Override
+    public ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest chatRequest) {
+        Chapter chapter = chapterRepository.findById(chapterId);
+
+        if(chapter == null)
+            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
+
+        User user = userRepository.findByUsername(authentication.getName());
+
+        if(user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+
+        String content = chapter.getContent();
+        if(content == null || content.isBlank())
+            throw new AppException(ErrorCode.CHAPTER_CONTENT_EMPTY);
+        String question = chatRequest.getQuestion().trim();
+        String answer = aiService.chatWithChapter(content, question);
+
+        AIChatHistory aiChatHistory = AIChatHistory.builder().question(question).answer(answer).sourceReference("CHAPTER: "+ chapterId).user(user).chapter(chapter).book(chapter.getBook()).build();
+        aiChatHistoryRepository.save(aiChatHistory);
+
+        return ChatResponse.builder().question(question).answer(answer).build();
+    }
+
+    @Override
+    public Page<AIChatHistoryResponse> getChatHistory(Authentication authentication, int chapterId, Pageable pageable) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if(user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        Page<AIChatHistory> aiChatHistories = aiChatHistoryRepository.findByUserIdAndChapterIdOrderByCreatedDateAsc(user.getId(), chapterId, pageable);
+        return aiChatHistories.map(aiChatHistoryMapper::toChatHistoryResponse);
+    }
+    @Transactional
+    @Override
+    public void deleteChatHistory(Authentication authentication, int chapterId) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if(user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        aiChatHistoryRepository.deleteByUserIdAndChapterId(user.getId(), chapterId);
     }
 }

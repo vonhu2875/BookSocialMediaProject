@@ -46,7 +46,7 @@ public class QuizServiceImpl implements QuizService {
         // 2. Lấy summary
         String summary = chapter.getSummary();
 
-        // 3. Nếu chưa có summary → tự động tạo bằng AI
+        // 3. Nếu chưa có summary => tự động tạo bằng AI
         if (summary == null || summary.isBlank()) {
 
             summary = aiService.summaryChapter(chapter.getContent());

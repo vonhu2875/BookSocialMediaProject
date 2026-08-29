@@ -8,12 +8,14 @@ import com.vtbn.booksocial.services.AIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.converter.BeanOutputConverter;
+//import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class GeminiAIServiceImpl implements AIService {
     private final ChatModel chatModel;
+//    private final EmbeddingModel embeddingModel;
     @Override
     public String summaryChapter(String content) {
         String prompt = """
@@ -64,5 +66,35 @@ public class GeminiAIServiceImpl implements AIService {
         }
 
         return converter.convert(response);
+    }
+
+    @Override
+    public String chatWithChapter(String content, String question) {
+        String prompt = """
+            Bạn là trợ lý AI hỗ trợ người dùng tìm hiểu nội dung chương sách.
+
+            Hãy trả lời câu hỏi dựa hoàn toàn vào nội dung chương được cung cấp.
+
+            Yêu cầu:
+            - Trả lời bằng tiếng Việt.
+            - Chỉ sử dụng thông tin có trong nội dung chương.
+            - Không tự thêm thông tin không có trong nội dung.
+            - Nếu nội dung chương không đủ thông tin để trả lời,
+              hãy nói rõ rằng nội dung chương không cung cấp thông tin này.
+            - Trả lời rõ ràng, dễ hiểu và đúng trọng tâm.
+
+            Nội dung chương:
+            %s
+
+            Câu hỏi của người dùng:
+            %s
+            """.formatted(content, question);
+
+        String response = chatModel.call(prompt);
+
+        if (response == null || response.isBlank()) {
+            throw new AppException(ErrorCode.AI_CHAT_FAILED);
+        }
+        return response;
     }
 }

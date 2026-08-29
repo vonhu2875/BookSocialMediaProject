@@ -15,4 +15,5 @@ public class QuizAttemptDetailResponse {
     private int score;
     private Instant submittedAt;
     private List<UserAnswerResponse> userAnswerResponses;
+    private int quiz;
 }

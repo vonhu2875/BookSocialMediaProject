@@ -15,7 +15,7 @@ public interface BookService {
     BookDetailResponse getBook(int id);
     BookDetailResponse updateBook(Authentication authentication, int id, BookRequest request);
     void deleteBook(Authentication authentication, int id);
-    Page<BookListResponse> getMyBooks(Authentication authentication,Pageable pageable);
+    Page<BookDetailResponse> getMyBooks(Authentication authentication,Pageable pageable);
     Page<BookListResponse> getPendingBooks(Pageable pageable);
     void approveBook(int id);
     void rejectBook(int id);

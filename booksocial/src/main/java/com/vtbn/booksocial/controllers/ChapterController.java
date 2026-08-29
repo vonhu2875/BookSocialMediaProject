@@ -1,6 +1,7 @@
 package com.vtbn.booksocial.controllers;
 
 import com.vtbn.booksocial.dto.request.ChapterRequest;
+import com.vtbn.booksocial.dto.request.ChatRequest;
 import com.vtbn.booksocial.dto.request.CommentRequest;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.ChapterService;
@@ -75,6 +76,24 @@ public class ChapterController {
     public ApiResponse<List<QuizListResponse>> getQuizzesByChapter(@PathVariable int chapterId) {
         List<QuizListResponse> responses = quizService.getQuizzesByChapter(chapterId);
         return ApiResponse.<List<QuizListResponse>>builder().result(responses).build();
+    }
+    //CHATBOT
+    @PostMapping("/{chapterId}/chat")
+    public ApiResponse<ChatResponse> chatWithChapter(Authentication authentication,@PathVariable int chapterId,@Valid @RequestBody ChatRequest chatRequest) {
+        ChatResponse response = chapterService.chatWithChapter(authentication,chapterId,chatRequest);
+        return ApiResponse.<ChatResponse>builder().result(response).build();
+    }
+
+    @GetMapping("/{chapterId}/chat/history")
+    public ApiResponse<Page<AIChatHistoryResponse>> getAIChatHistory(Authentication authentication, @PathVariable int chapterId, Pageable pageable) {
+        Page<AIChatHistoryResponse> aiChatHistoryResponses = chapterService.getChatHistory(authentication, chapterId, pageable);
+        return ApiResponse.<Page<AIChatHistoryResponse>>builder().result(aiChatHistoryResponses).build();
+    }
+
+    @DeleteMapping("/{chapterId}/chat/history")
+    public ApiResponse<Void> deleteAIChatHistory(Authentication authentication, @PathVariable int chapterId) {
+        chapterService.deleteChatHistory(authentication, chapterId);
+        return ApiResponse.<Void>builder().message("delete ai chat history success").build();
     }
 
 }

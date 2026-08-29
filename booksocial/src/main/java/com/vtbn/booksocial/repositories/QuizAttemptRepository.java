@@ -1,6 +1,8 @@
 package com.vtbn.booksocial.repositories;
 
 import com.vtbn.booksocial.entities.QuizAttempt;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +14,5 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Intege
     boolean existsByQuizId(int quizId);
     QuizAttempt findById(int id);
     List<QuizAttempt> findByQuizIdAndUserId(int quizId, int userId);
+    Page<QuizAttempt> findByUserId(int userId, Pageable pageable);
 }

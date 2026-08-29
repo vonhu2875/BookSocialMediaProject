@@ -41,6 +41,7 @@ public class QuizAttemptMapper {
                 .id(quizAttempt.getId())
                 .score(quizAttempt.getScore())
                 .submittedAt(quizAttempt.getSubmittedAt())
+                .quizId(quizAttempt.getQuiz().getId())
                 .build();
     }
 
@@ -58,6 +59,7 @@ public class QuizAttemptMapper {
                                 .map(userAnswerMapper::toUserAnswerResponse)
                                 .toList()
                 )
+                .quiz(quizAttempt.getQuiz().getId())
                 .build();
     }
 }

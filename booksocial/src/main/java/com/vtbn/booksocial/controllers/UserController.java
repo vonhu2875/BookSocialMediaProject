@@ -6,6 +6,7 @@ import com.vtbn.booksocial.dto.request.UpdateProfileRequest;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.BookService;
 import com.vtbn.booksocial.services.BookshelfService;
+import com.vtbn.booksocial.services.QuizAttemptService;
 import com.vtbn.booksocial.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class UserController {
     private final UserService userService;
     private final BookService bookService;
     private final BookshelfService bookshelfService;
+    private final QuizAttemptService quizAttemptService;
     @GetMapping("/my-info")
     public ApiResponse<UserResponse> getMyInfo(Authentication authentication) {
         var result = userService.getInfoUser(authentication.getName());
@@ -60,9 +62,9 @@ public class UserController {
     }
 
     @GetMapping("/books")
-    public ApiResponse<Page<BookListResponse>> getMyBooks(Authentication authentication, Pageable pageable) {
-        Page<BookListResponse> bookListResponses = bookService.getMyBooks(authentication, pageable);
-        return ApiResponse.<Page<BookListResponse>>builder().result(bookListResponses).build();
+    public ApiResponse<Page<BookDetailResponse>> getMyBooks(Authentication authentication, Pageable pageable) {
+        Page<BookDetailResponse> bookDetailResponses = bookService.getMyBooks(authentication, pageable);
+        return ApiResponse.<Page<BookDetailResponse>>builder().result(bookDetailResponses).build();
     }
 
     //Bookshelf
@@ -75,6 +77,19 @@ public class UserController {
                 bookshelfService.getMyBookshelf(authentication);
 
         return ApiResponse.<List<BookshelfResponse>>builder()
+                .result(response)
+                .build();
+    }
+
+    //Attempt quiz
+    @GetMapping("/my-attempts")
+    public ApiResponse<Page<QuizAttemptResponse>> getMyAttempts(
+            Authentication authentication, Pageable pageable) {
+
+        Page<QuizAttemptResponse> response =
+                quizAttemptService.getMyAttempts(authentication, pageable);
+
+        return ApiResponse.<Page<QuizAttemptResponse>>builder()
                 .result(response)
                 .build();
     }

@@ -1,12 +1,13 @@
 package com.vtbn.booksocial.services;
 
 import com.vtbn.booksocial.dto.request.ChapterRequest;
-import com.vtbn.booksocial.dto.response.ChapterDetailResponse;
-import com.vtbn.booksocial.dto.response.ChapterListResponse;
-import com.vtbn.booksocial.dto.response.ChapterSummaryResponse;
+import com.vtbn.booksocial.dto.request.ChatRequest;
+import com.vtbn.booksocial.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface ChapterService {
     ChapterDetailResponse createChapter(Authentication authentication, int bookId, ChapterRequest request);
@@ -15,4 +16,7 @@ public interface ChapterService {
     ChapterDetailResponse updateChapter(Authentication authentication, int chapterId, ChapterRequest request);
     void deleteChapter(Authentication authentication, int chapterId);
     ChapterSummaryResponse summaryChapter(Authentication authentication, int chapterId);
+    ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest chatRequest);
+    Page<AIChatHistoryResponse> getChatHistory(Authentication authentication, int chapterId, Pageable pageable);
+    void deleteChatHistory(Authentication authentication, int chapterId);
 }

@@ -141,10 +141,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Page<BookListResponse> getMyBooks(Authentication authentication, Pageable pageable) {
+    public Page<BookDetailResponse> getMyBooks(Authentication authentication, Pageable pageable) {
         String username = authentication.getName();
         Page<Book> books = bookRepository.findAllByAuthor_Username(username,pageable);
-        return books.map(bookMapper::toBookListResponse);
+        return books.map(bookMapper::toBookDetailResponse);
     }
 
     @Override

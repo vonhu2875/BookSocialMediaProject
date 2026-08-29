@@ -16,6 +16,8 @@ import com.vtbn.booksocial.mappers.UserAnswerMapper;
 import com.vtbn.booksocial.repositories.*;
 import com.vtbn.booksocial.services.QuizAttemptService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -190,5 +192,16 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         return attempts.stream()
                 .map(quizAttemptMapper::toQuizAttemptResponse)
                 .toList();
+    }
+
+    @Override
+    public Page<QuizAttemptResponse> getMyAttempts(Authentication authentication, Pageable pageable) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Page<QuizAttempt> attempts = quizAttemptRepository.findByUserId(user.getId(), pageable);
+        return attempts.map(quizAttemptMapper::toQuizAttemptResponse);
     }
 }

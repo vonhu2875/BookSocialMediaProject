@@ -27,6 +27,9 @@ public class QuizMapper {
     public QuizDetailResponse toQuizDetailResponse(Quiz quiz, List<Question>questions) {
         return QuizDetailResponse.builder().id(quiz.getId()).summary(quiz.getSummary())
                 .questions(questions.stream().map(questionMapper::toQuestionResponse).toList())
+                .chapterId(quiz.getChapter().getId())
+                .chapterTitle(quiz.getChapter().getTitle())
+                .bookTitle(quiz.getChapter().getBook().getTitle())
                 .build();
     }
 }

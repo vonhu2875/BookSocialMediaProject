@@ -107,7 +107,7 @@ public enum ErrorCode {
     BOOK_ALREADY_IN_BOOKSHELF(1046, "Book already in bookshelf", HttpStatus.BAD_REQUEST),
     BOOK_NOT_IN_BOOKSHELF(1047, "Book not in bookshelf", HttpStatus.BAD_REQUEST),
     CHAPTER_NOT_IN_BOOK(1048, "Chapter not in book", HttpStatus.BAD_REQUEST),
-
+    AI_CHAT_FAILED(1049, "AI chat failed", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -13,4 +13,5 @@ public class QuizAttemptResponse {
     private int id;
     private int score;
     private Instant submittedAt;
+    private int quizId;
 }

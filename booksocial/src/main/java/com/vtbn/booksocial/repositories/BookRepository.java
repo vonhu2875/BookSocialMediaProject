@@ -14,9 +14,7 @@ import java.util.Set;
 public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecificationExecutor<Book> {
     Page<Book> findAllByStatus(BookStatus status,
                             Pageable pageable);
-    Set<Book> findByTitle(String title);
     boolean existsByTitleAndAuthor_Username(String title, String username);
-
     Book findById(int id);
     Page<Book> findAllByAuthor_Username(String username, Pageable pageable);
 }

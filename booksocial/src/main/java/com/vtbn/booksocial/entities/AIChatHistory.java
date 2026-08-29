@@ -20,6 +20,7 @@ public class AIChatHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String question;
+    @Column(columnDefinition = "TEXT")
     private String answer;
     private String sourceReference;
     @CreatedDate
