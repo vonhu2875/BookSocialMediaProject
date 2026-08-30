@@ -19,6 +19,7 @@ public class BookListResponse {
     private BookLanguage language;
     private int viewCount;
     private int authorId;
+    private BookStatus status;
     private String authorUsername;
     private int totalChapters;
     private List<CategoryResponse> categories;

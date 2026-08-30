@@ -10,10 +10,7 @@ import com.vtbn.booksocial.exceptions.ErrorCode;
 import com.vtbn.booksocial.mappers.AIChatHistoryMapper;
 import com.vtbn.booksocial.mappers.ChapterMapper;
 import com.vtbn.booksocial.repositories.*;
-import com.vtbn.booksocial.services.AIService;
-import com.vtbn.booksocial.services.ChapterFileService;
-import com.vtbn.booksocial.services.ChapterService;
-import com.vtbn.booksocial.services.CloudinaryService;
+import com.vtbn.booksocial.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +33,9 @@ public class ChapterServiceImpl implements ChapterService {
     private final AIChatHistoryRepository aiChatHistoryRepository;
     private final AIService aiService;
     private final AIChatHistoryMapper aiChatHistoryMapper;
+    private final ChatServiceImpl chatServiceImpl;
+    //chatbot chương
+    private final ChapterIndexingService chapterIndexingService;
     @Override
 //    Nếu Chapter save thành công nhưng Book update thất bại thì transaction sẽ rollback.
     @Transactional
@@ -74,6 +74,8 @@ public class ChapterServiceImpl implements ChapterService {
         chapter.setContent(content);
         chapter.setFileUrl(fileUrl);
         chapterRepository.save(chapter);
+        //update lại vectorstore khi tạo
+        chapterIndexingService.indexChapter(chapter);
         book.setTotalChapters(book.getTotalChapters() + 1);
         bookRepository.save(book);
         return chapterMapper.toChapterDetailResponse(chapter);
@@ -129,6 +131,8 @@ public class ChapterServiceImpl implements ChapterService {
             chapter.setSummary(null);
         }
         chapterRepository.save(chapter);
+        //tự xóa bản cũ và index lại
+        chapterIndexingService.indexChapter(chapter);
         return chapterMapper.toChapterDetailResponse(chapter);
     }
 
@@ -187,6 +191,7 @@ public class ChapterServiceImpl implements ChapterService {
         bookRepository.save(book);
 
         // 7. Xóa chapter
+        chapterIndexingService.removeChapterIndex(chapterId);
         chapterRepository.delete(chapter);
 
         // 8. Xóa file trên Cloudinary
@@ -229,26 +234,27 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest chatRequest) {
-        Chapter chapter = chapterRepository.findById(chapterId);
-
-        if(chapter == null)
-            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
-
-        User user = userRepository.findByUsername(authentication.getName());
-
-        if(user == null)
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-
-        String content = chapter.getContent();
-        if(content == null || content.isBlank())
-            throw new AppException(ErrorCode.CHAPTER_CONTENT_EMPTY);
-        String question = chatRequest.getQuestion().trim();
-        String answer = aiService.chatWithChapter(content, question);
-
-        AIChatHistory aiChatHistory = AIChatHistory.builder().question(question).answer(answer).sourceReference("CHAPTER: "+ chapterId).user(user).chapter(chapter).book(chapter.getBook()).build();
-        aiChatHistoryRepository.save(aiChatHistory);
-
-        return ChatResponse.builder().question(question).answer(answer).build();
+//        Chapter chapter = chapterRepository.findById(chapterId);
+//
+//        if(chapter == null)
+//            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
+//
+//        User user = userRepository.findByUsername(authentication.getName());
+//
+//        if(user == null)
+//            throw new AppException(ErrorCode.USER_NOT_FOUND);
+//
+//        String content = chapter.getContent();
+//        if(content == null || content.isBlank())
+//            throw new AppException(ErrorCode.CHAPTER_CONTENT_EMPTY);
+//        String question = chatRequest.getQuestion().trim();
+//        String answer = aiService.chatWithChapter(content, question);
+//
+//        AIChatHistory aiChatHistory = AIChatHistory.builder().question(question).answer(answer).sourceReference("CHAPTER: "+ chapterId).user(user).chapter(chapter).book(chapter.getBook()).build();
+//        aiChatHistoryRepository.save(aiChatHistory);
+//
+//        return ChatResponse.builder().question(question).answer(answer).build();
+        return chatServiceImpl.chatWithChapter(authentication, chapterId, chatRequest);
     }
 
     @Override

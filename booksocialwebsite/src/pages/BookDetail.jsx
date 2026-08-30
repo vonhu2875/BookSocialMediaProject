@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { bookService, authService } from '../services/apiServices';
 import ChapterList from '../components/ChapterList';
 import RatingSection from '../components/RatingSection';
+import BookChat from '../components/BookChat';
 import {
   BookOpen,
   User,
@@ -39,17 +40,17 @@ export default function BookDetail() {
           bookService.getChapterByBookId(id).catch(() => null), // Gọi thêm API danh sách chương
         ]);
 
-        const bookData = bookRes?.data?.result || bookRes?.result || bookRes;
-        const sumData = summaryRes?.data?.result || summaryRes?.result || summaryRes;
-        const chapData = chapterRes?.data?.result || chapterRes?.result || chapterRes?.content || [];
+        const bookData = bookRes;
+        const sumData = summaryRes;
+        const chapData = chapterRes?.content || [];
 
         setBook(bookData);
         setRatingSummary(sumData);
-        setChapters(Array.isArray(chapData) ? chapData : []);
+        setChapters(chapData);
 
         try {
           const shelfRes = await authService.getMyBookshelf();
-          const shelfData = shelfRes?.data?.result || shelfRes?.result || shelfRes || [];
+          const shelfData = shelfRes;
           if (Array.isArray(shelfData)) {
             const found = shelfData.some((item) => item.bookId === Number(id) || item.id === Number(id));
             setIsSaved(found);
@@ -154,9 +155,17 @@ export default function BookDetail() {
 
           {/* Meta */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-medium text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <User className="w-4 h-4 text-indigo-400" /> {book.authorUsername || 'Chưa cập nhật'}
-            </span>
+            {book.authorUsername ? (
+              <span className="flex items-center gap-1.5 text-indigo-300">
+                <User className="w-4 h-4 text-indigo-400" />
+                {book.authorUsername}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <User className="w-4 h-4 text-indigo-400" />
+                Chưa cập nhật
+              </span>
+            )}
 
             <span className="flex items-center gap-1.5 text-amber-400 font-bold bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-lg">
               <Star className="w-4 h-4 fill-amber-400" /> 
@@ -238,7 +247,7 @@ export default function BookDetail() {
 
       {/* Tabs */}
       <div className="space-y-6">
-        <div className="flex border-b border-slate-800">
+        <div className="flex flex-wrap border-b border-slate-800">
           <button
             onClick={() => setActiveTab('chapters')}
             className={`pb-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
@@ -267,6 +276,8 @@ export default function BookDetail() {
           <RatingSection bookId={id} />
         )}
       </div>
+
+      <BookChat bookId={id} />
     </div>
   );
 }

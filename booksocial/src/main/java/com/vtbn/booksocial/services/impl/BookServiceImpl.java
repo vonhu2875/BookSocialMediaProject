@@ -25,9 +25,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +42,28 @@ public class BookServiceImpl implements BookService {
     private final CategoryRepository categoryRepository;
     private final CloudinaryService cloudinaryService;
     private final BookRepository bookRepository;
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/webp", "image/gif"
+    );
 
+    private void validateImageFile(MultipartFile file) {
+        // Lớp 1: check content-type client gửi lên
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new AppException(ErrorCode.INVALID_BOOK_FILE_IMAGE);
+        }
+
+        // Lớp 2: đọc thử file bằng ImageIO để chắc chắn đây là ảnh thật,
+        // tránh trường hợp đổi đuôi .pdf/.docx thành .jpg
+        try (InputStream inputStream = file.getInputStream()) {
+            BufferedImage image = ImageIO.read(inputStream);
+            if (image == null) {
+                throw new AppException(ErrorCode.INVALID_BOOK_FILE_IMAGE);
+            }
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.INVALID_BOOK_FILE_IMAGE);
+        }
+    }
     @Override
     public BookListResponse createBook(Authentication authentication, BookRequest request) {
         String username = authentication.getName();
@@ -62,6 +88,7 @@ public class BookServiceImpl implements BookService {
         MultipartFile coverImg = request.getCoverImage();
 
         if(coverImg != null && !coverImg.isEmpty()) {
+            validateImageFile(coverImg);
             String coverImage = cloudinaryService.uploadFile(coverImg, "booksocial/cover-image");
             book.setCoverImage(coverImage);
         }
@@ -86,7 +113,6 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id);
         if(book==null)
             throw new AppException(ErrorCode.BOOK_NOT_FOUND);
-
         return bookMapper.toBookDetailResponse(book);
     }
 
@@ -115,6 +141,7 @@ public class BookServiceImpl implements BookService {
         }
         MultipartFile coverImg = request.getCoverImage();
         if(coverImg != null && !coverImg.isEmpty()) {
+            validateImageFile(coverImg);
             String coverImage = cloudinaryService.uploadFile(coverImg, "booksocial/cover-image");
             book.setCoverImage(coverImage);
         }
@@ -150,6 +177,12 @@ public class BookServiceImpl implements BookService {
     @Override
     public Page<BookListResponse> getPendingBooks(Pageable pageable) {
         Page<Book> books =bookRepository.findAllByStatus(BookStatus.PENDING,pageable);
+        return books.map(bookMapper::toBookListResponse);
+    }
+
+    @Override
+    public Page<BookListResponse> getRejectingBooks(Pageable pageable) {
+        Page<Book> books =bookRepository.findAllByStatus(BookStatus.REJECTED,pageable);
         return books.map(bookMapper::toBookListResponse);
     }
 

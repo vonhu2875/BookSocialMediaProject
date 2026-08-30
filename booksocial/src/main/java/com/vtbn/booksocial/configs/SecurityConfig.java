@@ -86,11 +86,10 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                                 ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users", "/books/pending").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users", "/books/pending", "/books/rejecting").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categories/{id}", "/books/{id}/approve", "/books/{id}/reject").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/users/**", "/categories/{id}", "/quizzes/{quizId}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/books").hasRole("READER")
                         // Các API còn lại phải đăng nhập
                         .anyRequest().authenticated()
                 )

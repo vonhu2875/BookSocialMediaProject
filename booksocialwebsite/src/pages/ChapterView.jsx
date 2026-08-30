@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { chapterService, bookService } from '../services/apiServices';
 import CommentSection from '../components/CommentSection';
+import ChapterChat from '../components/ChapterChat';
 import {
   Sparkles,
   ChevronLeft,
@@ -12,12 +13,12 @@ import {
   HelpCircle,
   ArrowLeft,
   Bot,
+  Trash2,
   Settings,
   Type,
   Moon,
   BookOpen,
   Sun,
-  MessageSquare,
 } from 'lucide-react';
 
 export default function ChapterView() {
@@ -40,20 +41,29 @@ export default function ChapterView() {
   const [summary, setSummary] = useState(null);
   const [summarizing, setSummarizing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [aiMode, setAiMode] = useState('summary');
+  const [deletingChatHistory, setDeletingChatHistory] = useState(false);
+  const [chatResetKey, setChatResetKey] = useState(0);
+
+  const chapterQuickPrompts = [
+    'Tóm tắt nội dung chính của chương này bằng 3 điểm',
+    'Nhân vật nào đóng vai trò quan trọng nhất?',
+    'Chương này nói về chủ đề gì?',
+    'Nêu ý chính tôi cần chú ý khi đọc chương này',
+  ];
 
   // Reading Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('reader_font_size') || 'text-base');
   const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('reader_font_family') || 'font-serif');
-  const [lineHeight, setLineHeight] = useState(() => localStorage.getItem('reader_line_height') || 'leading-relaxed');
+  const lineHeight = 'leading-relaxed';
   const [theme, setTheme] = useState(() => localStorage.getItem('reader_theme') || 'dark');
 
   useEffect(() => {
     localStorage.setItem('reader_font_size', fontSize);
     localStorage.setItem('reader_font_family', fontFamily);
-    localStorage.setItem('reader_line_height', lineHeight);
     localStorage.setItem('reader_theme', theme);
-  }, [fontSize, fontFamily, lineHeight, theme]);
+  }, [fontSize, fontFamily, theme]);
 
   useEffect(() => {
     const fetchChapterData = async () => {
@@ -64,12 +74,13 @@ export default function ChapterView() {
 
       try {
         const chapRes = await chapterService.getDetail(chapterId);
-        setChapter(chapRes);
+        const chapterData = chapRes;
+        setChapter(chapterData);
 
-        const currentBookId = chapRes?.bookId;
+        const currentBookId = chapterData?.bookId;
         if (currentBookId) {
           const listRes = await bookService.getChapterByBookId(currentBookId).catch(() => null);
-          const list = Array.isArray(listRes?.content) ? listRes?.content : Array.isArray(listRes) ? listRes : [];
+          const list = listRes?.content || [];
 
           const curIdNum = Number(chapterId);
           const idx = list.findIndex((c) => Number(c.id || c.chapterId) === curIdNum);
@@ -78,7 +89,7 @@ export default function ChapterView() {
             setPrevChapter(idx > 0 ? list[idx - 1] : null);
             setNextChapter(idx < list.length - 1 ? list[idx + 1] : null);
           } else {
-            const curNum = Number(chapRes?.chapterNumber);
+            const curNum = Number(chapterData?.chapterNumber);
             setPrevChapter(list.find((c) => Number(c.chapterNumber) === curNum - 1) || null);
             setNextChapter(list.find((c) => Number(c.chapterNumber) === curNum + 1) || null);
           }
@@ -119,7 +130,7 @@ export default function ChapterView() {
     }
 
     return pageList.length > 0 ? pageList : [chapter.content];
-  }, [chapter?.content]);
+  }, [chapter]);
 
   // TIẾN ĐỘ ĐỌC TÍNH THEO TRANG (%)
   const readingProgress = useMemo(() => {
@@ -131,14 +142,22 @@ export default function ChapterView() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-        handleNextPage();
+        if (currentPage < pages.length) {
+          setCurrentPage((prev) => prev + 1);
+        } else if (nextChapter) {
+          navigate(`/chapters/${nextChapter.id || nextChapter.chapterId}`);
+        }
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        handlePrevPage();
+        if (currentPage > 1) {
+          setCurrentPage((prev) => prev - 1);
+        } else if (prevChapter) {
+          navigate(`/chapters/${prevChapter.id || prevChapter.chapterId}`);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, pages.length, nextChapter, prevChapter]);
+  }, [currentPage, pages.length, nextChapter, prevChapter, navigate]);
 
   const handleNextPage = () => {
     if (currentPage < pages.length) {
@@ -156,20 +175,15 @@ export default function ChapterView() {
     }
   };
 
-  const scrollToComments = () => {
-    if (commentRef.current) {
-      commentRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const handleSummarize = async () => {
+    setAiMode('summary');
     setIsDrawerOpen(true);
     if (summary) return;
 
     setSummarizing(true);
     try {
       const res = await chapterService.summarize(chapterId);
-      const sumData = res?.data?.result || res?.result || res;
+      const sumData = res;
       setSummary(sumData?.summary || sumData);
     } catch (error) {
       console.error('Lỗi tóm tắt chương:', error);
@@ -177,6 +191,11 @@ export default function ChapterView() {
     } finally {
       setSummarizing(false);
     }
+  };
+
+  const handleOpenChat = () => {
+    setAiMode('chat');
+    setIsDrawerOpen(true);
   };
 
   // STYLE CHỈ ÁP DỤNG CHO KHUNG ĐỌC SÁCH
@@ -447,10 +466,7 @@ export default function ChapterView() {
         </div>
       </main>
 
-      {/* FLOATING TOOLBAR BÊN DƯỚI */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/90 border border-slate-700/60 backdrop-blur-xl px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 sm:gap-3 border-indigo-500/20">
-        
-        {/* Nút Prev Chapter */}
         {prevChapter ? (
           <Link
             to={`/chapters/${prevChapter.id || prevChapter.chapterId}`}
@@ -467,7 +483,6 @@ export default function ChapterView() {
 
         <div className="h-4 w-[1px] bg-slate-800" />
 
-        {/* Nút AI Summary */}
         <button
           onClick={handleSummarize}
           className="relative group px-3.5 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105 transition duration-200"
@@ -476,20 +491,16 @@ export default function ChapterView() {
           <span className="hidden sm:inline">Tóm tắt AI</span>
         </button>
 
-        {/* Nút Quiz */}
         <button
-          onClick={() => navigate(`/chapters/${chapterId}/quiz`)}
+          onClick={() => navigate(`/chapters/${chapterId}/quizzes`)}
           className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-full text-xs font-bold flex items-center gap-1.5 transition"
         >
           <HelpCircle className="w-4 h-4" />
           <span className="hidden sm:inline">Quiz</span>
         </button>
 
-        
-
         <div className="h-4 w-[1px] bg-slate-800" />
 
-        {/* Nút Next Chapter */}
         {nextChapter ? (
           <Link
             to={`/chapters/${nextChapter.id || nextChapter.chapterId}`}
@@ -505,61 +516,119 @@ export default function ChapterView() {
         )}
       </div>
 
-      {/* AI DRAWER */}
-      {isDrawerOpen && (
-        <div
-          onClick={() => setIsDrawerOpen(false)}
-          className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm transition-opacity"
-        />
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          const nextOpen = !isDrawerOpen;
+          if (nextOpen) {
+            setAiMode('chat');
+          }
+          setIsDrawerOpen(nextOpen);
+        }}
+        className={`fixed bottom-4 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border transition-all duration-300 ${
+          isDrawerOpen
+            ? 'border-indigo-400/40 bg-indigo-600/80 text-white shadow-[0_12px_30px_rgba(79,70,229,0.45)]'
+            : 'border-cyan-400/30 bg-gradient-to-br from-cyan-500 to-indigo-600 text-white shadow-[0_12px_30px_rgba(34,211,238,0.45)]'
+        }`}
+        aria-label={isDrawerOpen ? 'Đóng trợ lý AI' : 'Mở trợ lý AI'}
+        title={isDrawerOpen ? 'Đóng trợ lý AI' : 'Mở trợ lý AI'}
+      >
+        <Bot className="w-5 h-5" />
+      </button>
 
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full sm:w-[400px] bg-slate-900/95 border-l border-indigo-500/30 backdrop-blur-2xl p-6 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+        aria-hidden={!isDrawerOpen}
+        className={`fixed bottom-4 right-20 z-50 flex h-[min(640px,calc(100vh-5rem))] w-[calc(100%-1.5rem)] max-w-[380px] flex-col rounded-2xl border border-indigo-500/30 bg-slate-900 shadow-2xl shadow-black/50 transition-all duration-300 ease-out ${
+          isDrawerOpen
+            ? 'translate-y-0 opacity-100'
+            : 'pointer-events-none translate-y-4 opacity-0'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-800 p-4">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
               <Bot className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Trợ lý AI Trợ đọc</h3>
-              <p className="text-[10px] text-slate-400">Tóm tắt chương {chapter.chapterNumber}</p>
+              <h3 className="text-sm font-bold text-white">Trợ lý AI</h3>
+              <p className="text-[10px] text-slate-400">Tóm tắt và hỏi đáp chương {chapter.chapterNumber}</p>
             </div>
           </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                setIsDrawerOpen(false);
+                setSummary(null);
+              }}
+              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              title="Đóng trợ lý AI"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 border-b border-slate-800 px-4 py-2">
           <button
-            onClick={() => setIsDrawerOpen(false)}
-            className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+            type="button"
+            onClick={() => setAiMode('summary')}
+            className={`flex-1 rounded-xl px-3 py-2 text-[11px] font-bold transition ${
+              aiMode === 'summary'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
           >
-            <X className="w-5 h-5" />
+            Tóm tắt
+          </button>
+          <button
+            type="button"
+            onClick={() => setAiMode('chat')}
+            className={`flex-1 rounded-xl px-3 py-2 text-[11px] font-bold transition ${
+              aiMode === 'chat'
+                ? 'bg-cyan-500 text-slate-950'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Chatbot
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 space-y-4">
-          {summarizing ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-3 text-slate-400 py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-              <p className="text-xs animate-pulse">AI đang đọc và tổng hợp nội dung...</p>
-            </div>
-          ) : (
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-xs sm:text-sm text-slate-300 leading-relaxed space-y-3">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
-                <Sparkles className="w-3.5 h-3.5" /> Key Takeaways
+        <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+          {aiMode === 'summary' ? (
+            summarizing ? (
+              <div className="flex h-full flex-col items-center justify-center space-y-3 text-slate-400 py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+                <p className="text-xs animate-pulse">AI đang đọc và tổng hợp nội dung...</p>
               </div>
-              <p className="whitespace-pre-line">{summary}</p>
+            ) : summary ? (
+              <div className="scrollbar-chat h-full min-h-[120px] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-xs leading-relaxed text-slate-300 sm:text-sm">
+                <div className="mb-3 flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                  <Sparkles className="w-3.5 h-3.5" /> Key Takeaways
+                </div>
+                <p className="whitespace-pre-line">{summary}</p>
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/40 p-4 text-center text-xs text-slate-500">
+                Chưa có tóm tắt. Hãy nhấn “Tóm tắt AI” để tạo nội dung.
+              </div>
+            )
+          ) : (
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <ChapterChat key={chatResetKey} chapterId={chapterId} />
             </div>
           )}
         </div>
 
-        <div className="pt-4 border-t border-slate-800 flex gap-2">
-          <button
-            onClick={() => navigate(`/chapters/${chapterId}/quiz`)}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition"
-          >
-            <HelpCircle className="w-4 h-4" /> Làm Quiz Kiểm Tra Thử
-          </button>
-        </div>
+        {aiMode === 'summary' && (
+          <div className="shrink-0 border-t border-slate-800 p-4">
+            <button
+              onClick={() => navigate(`/chapters/${chapterId}/quizzes`)}
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition"
+            >
+              <HelpCircle className="w-4 h-4" /> Làm Quiz Kiểm Tra Thử
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

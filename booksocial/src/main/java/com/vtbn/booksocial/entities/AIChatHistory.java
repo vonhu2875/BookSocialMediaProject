@@ -32,7 +32,7 @@ public class AIChatHistory {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chapter_id", nullable = false)
+    @JoinColumn(name = "chapter_id")
     private Chapter chapter;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 public interface UserService {
     UserResponse getInfoUser(String username);
     UserResponse updateInfoUser(String username, UpdateProfileRequest request);
-    UserPublicResponse userPublicResponse(String username);
+
     void changePassword(String username, ChangePasswordRequest request);
     Page<UserResponse> getAllUser(Pageable pageable);
     void deleteUser(int id);

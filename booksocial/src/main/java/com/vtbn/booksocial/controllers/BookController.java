@@ -1,14 +1,12 @@
 package com.vtbn.booksocial.controllers;
 
-import com.vtbn.booksocial.dto.request.BookRequest;
-import com.vtbn.booksocial.dto.request.ChapterRequest;
-import com.vtbn.booksocial.dto.request.RatingRequest;
-import com.vtbn.booksocial.dto.request.ReadingProgressRequest;
+import com.vtbn.booksocial.dto.request.*;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.BookService;
 import com.vtbn.booksocial.services.BookshelfService;
 import com.vtbn.booksocial.services.ChapterService;
 import com.vtbn.booksocial.services.RatingService;
+import com.vtbn.booksocial.services.impl.ChatServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +24,7 @@ public class BookController {
     private final ChapterService chapterService;
     private final RatingService ratingService;
     private final BookshelfService bookshelfService;
+    private final ChatServiceImpl chatService;
     @PostMapping
     public ApiResponse<BookListResponse> createBook(Authentication authentication, @ModelAttribute BookRequest request) {
         BookListResponse bookListResponse = bookService.createBook(authentication, request);
@@ -46,6 +45,11 @@ public class BookController {
         return ApiResponse.<Page<BookListResponse>>builder().result(books).build();
     }
 
+    @GetMapping("/rejecting")
+    public ApiResponse<Page<BookListResponse>> getRejectingBooks(Pageable pageable) {
+        Page<BookListResponse> books = bookService.getRejectingBooks(pageable);
+        return ApiResponse.<Page<BookListResponse>>builder().result(books).build();
+    }
     @GetMapping("/{id}")
     public ApiResponse<BookDetailResponse> getBook(@PathVariable int id) {
         BookDetailResponse bookDetailResponse = bookService.getBook(id);
@@ -63,8 +67,6 @@ public class BookController {
         bookService.deleteBook(authentication, id);
         return ApiResponse.<Void>builder().message("Delete book success").build();
     }
-
-
 
     @PutMapping("/{id}/approve")
     public ApiResponse<Void> approveBook(@PathVariable int id) {
@@ -86,8 +88,8 @@ public class BookController {
 
     @GetMapping("/{bookId}/chapters")
     public ApiResponse<Page<ChapterListResponse>> getChapters(@PathVariable int bookId, Pageable pageable){
-            Page<ChapterListResponse> chapterListResponses = chapterService.getChapters(bookId, pageable);
-            return ApiResponse.<Page<ChapterListResponse>>builder().result(chapterListResponses).build();
+        Page<ChapterListResponse> chapterListResponses = chapterService.getChapters(bookId, pageable);
+        return ApiResponse.<Page<ChapterListResponse>>builder().result(chapterListResponses).build();
     }
 
     //RATING
@@ -157,5 +159,24 @@ public class BookController {
         return ApiResponse.<Void>builder()
                 .message("View count increased")
                 .build();
+    }
+
+    //Chatbot book
+    @PostMapping("/{bookId}/chat")
+    public ApiResponse<ChatResponse> chatWithBook(Authentication authentication,@PathVariable int bookId,@Valid @RequestBody ChatRequest chatRequest) {
+        ChatResponse chatResponse = chatService.chatWithBook(authentication, bookId, chatRequest);
+        return ApiResponse.<ChatResponse>builder().result(chatResponse).build();
+    }
+
+    @GetMapping("/{bookId}/chat/history")
+    public ApiResponse<Page<AIChatHistoryResponse>> getAIChatHistory(Authentication authentication, @PathVariable int bookId, Pageable pageable) {
+        Page<AIChatHistoryResponse> aiChatHistoryResponses = chatService.getBookChatHistory(authentication, bookId, pageable);
+        return ApiResponse.<Page<AIChatHistoryResponse>>builder().result(aiChatHistoryResponses).build();
+    }
+
+    @DeleteMapping("/{bookId}/chat/history")
+    public ApiResponse<Void> deleteAIChatHistory(Authentication authentication, @PathVariable int bookId) {
+        chatService.deleteBookChatHistory(authentication, bookId);
+        return ApiResponse.<Void>builder().message("delete ai chat history success").build();
     }
 }

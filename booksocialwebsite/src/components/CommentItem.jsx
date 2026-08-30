@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { commentService } from '../services/apiServices';
 import { User, Edit3, Trash2, Reply, Send, Loader2, Check } from 'lucide-react';
 

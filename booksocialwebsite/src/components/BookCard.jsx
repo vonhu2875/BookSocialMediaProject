@@ -1,12 +1,7 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, User, Eye, Bookmark, Loader2 } from 'lucide-react';
-import { bookService } from '../services/apiServices';
+import { BookOpen, User, Eye } from 'lucide-react';
 
-export default function BookCard({ book, initialSaved = false, onBookshelfUpdated }) {
-  const [saving, setSaving] = useState(false);
-  const [isSaved, setIsSaved] = useState(initialSaved);
-
+export default function BookCard({ book }) {
   return (
     <Link
       to={`/books/${book.id}`}
@@ -31,7 +26,7 @@ export default function BookCard({ book, initialSaved = false, onBookshelfUpdate
           {/* Số Lượt Xem (viewCount từ BookListResponse) */}
           <div className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-slate-950/80 backdrop-blur-md border border-slate-700/50 rounded-xl flex items-center gap-1.5 text-[11px] font-bold text-slate-200 shadow-md">
             <Eye className="w-3.5 h-3.5 text-indigo-400" />
-            {book.viewCount.toLocaleString()}
+            {(book.viewCount || 0).toLocaleString()}
           </div>
         </div>
 

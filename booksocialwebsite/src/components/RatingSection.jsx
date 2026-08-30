@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { bookService, authService } from '../services/apiServices';
 import { Star, MessageSquare, Send, Loader2, User, Edit3, X, Check, Trash2 } from 'lucide-react';
 
@@ -23,12 +23,12 @@ export default function RatingSection({ bookId }) {
         authService.getMyInfo().catch(() => null),
       ]);
 
-      const sumData = sumRes?.data?.result || sumRes?.result || sumRes;
-      const rawList = listRes?.data?.result || listRes?.result || listRes;
-      const myInfo = myInfoRes?.data?.result || myInfoRes?.result || myInfoRes;
+      const sumData = sumRes;
+      const rawList = listRes;
+      const myInfo = myInfoRes;
 
       setSummary(sumData);
-      setRatings(rawList?.content ? rawList.content : (Array.isArray(rawList) ? rawList : []));
+      setRatings(rawList);
       if (myInfo?.id) setCurrentUserId(myInfo.id);
     } catch (error) {
       console.error('Lỗi tải đánh giá:', error);

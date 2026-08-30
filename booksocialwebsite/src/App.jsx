@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
@@ -9,6 +8,16 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import BookDetail from './pages/BookDetail';
 import ChapterView from './pages/ChapterView';
+import UploadBook from './pages/UploadBook';
+import Profile from './pages/profiles/Profile';
+import QuizResult from './components/QuizResult';
+import QuizView from './components/QuizView';
+import Bookshelfs from './pages/profiles/BookShelf';
+import MyBooks from './pages/profiles/MyBooks';
+import CreateChapter from './pages/CreateChapter';
+import EditBook from './pages/EditBook';
+import QuizHistory from './pages/profiles/QuizHistory';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Layout dùng chung cho các trang yêu cầu đăng nhập
 function MainLayout() {
@@ -25,34 +34,42 @@ function MainLayout() {
   );
 }
 
+const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
+  { path: '/register', element: <Register /> },
+  {
+    element: <ProtectedRoute />,
+    children: [{
+      element: <MainLayout />,
+      children: [
+        { path: '/', element: <Home /> },
+        { path: '/books/:id', element: <BookDetail /> },
+        { path: '/books/create', element: <UploadBook /> },
+        { path: '/books/:id/chapters/create', element: <CreateChapter /> },
+        { path: '/books/:id/edit', element: <EditBook /> },
+        { path: '/chapters/:chapterId', element: <ChapterView /> },
+        { path: '/chapters/:chapterId/quizzes', element: <QuizView /> },
+        { path: '/quiz-attempts/:attemptId', element: <QuizResult /> },
+        { path: '/quiz-history', element: <QuizHistory /> },
+        { path: '/profile', element: <Profile /> },
+        { path: '/my-books', element: <MyBooks /> },
+        { path: 'users/bookshelfs', element: <Bookshelfs /> },
+      ],
+    }],
+  },
+  {
+    element: <ProtectedRoute requireAdmin={true} />,
+    children: [{
+      element: <MainLayout />,
+      children: [{ path: '/admin', element: <AdminDashboard /> }],
+    }],
+  },
+]);
+
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          
-          {/* Reader Routes (Yêu cầu phải đăng nhập) */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/books/:id" element={<BookDetail />} />
-              <Route path="/chapters/:chapterId" element={<ChapterView />} />
-              <Route path="/bookshelfs" element={<div className="p-8 font-bold text-center">Tủ sách cá nhân</div>} />
-              <Route path="/profile" element={<div className="p-8 font-bold text-center">Trang cá nhân</div>} />
-            </Route>
-          </Route>
-
-          {/* Admin Routes (Yêu cầu quyền ADMIN) */}
-          <Route element={<ProtectedRoute requireAdmin={true} />}>
-            <Route element={<MainLayout />}>
-              <Route path="/books/pending" element={<div className="p-8 font-bold text-center">Trang duyệt sách Admin</div>} />
-            </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </AuthProvider>
   );
 }

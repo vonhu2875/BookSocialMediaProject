@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { chapterService, authService } from '../services/apiServices';
 import CommentItem from './CommentItem';
 import {
@@ -20,6 +20,7 @@ export default function CommentSection({ chapterId }) {
   // Phân trang
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalComments, setTotalComments] = useState(0);
 
   const pageSize = 5;
 
@@ -44,23 +45,16 @@ export default function CommentSection({ chapterId }) {
        * }
        */
 
-      const pageData =
-        commentsRes?.data?.result ||
-        commentsRes?.data ||
-        commentsRes?.result ||
-        commentsRes;
+      const pageData = commentsRes;
 
-      const rawList = pageData?.content || [];
+      const rawList = pageData.content;
 
-      const myInfo =
-        myInfoRes?.data?.result ||
-        myInfoRes?.result ||
-        myInfoRes ||
-        null;
+      const myInfo = myInfoRes;
 
-      setComments(Array.isArray(rawList) ? rawList : []);
+      setComments(rawList);
 
-      setTotalPages(pageData?.totalPages || 0);
+      setTotalPages(pageData.totalPages);
+      setTotalComments(pageData.totalElements);
 
       if (myInfo?.id) {
         setCurrentUserId(myInfo.id);
@@ -129,9 +123,9 @@ export default function CommentSection({ chapterId }) {
         <MessageSquare className="w-5 h-5 text-indigo-400" />
 
         BÌNH LUẬN CHƯƠNG
-        {totalPages > 0 && (
+        {totalComments > 0 && (
           <span className="text-slate-500 font-normal">
-            ({totalPages * pageSize})
+            ({totalComments})
           </span>
         )}
       </h3>

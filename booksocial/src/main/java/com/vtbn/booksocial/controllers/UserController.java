@@ -43,11 +43,7 @@ public class UserController {
         return ApiResponse.<Void>builder().message("change password success").build();
     }
 
-    @GetMapping("/{username}")
-    public ApiResponse<UserPublicResponse> getPublicInfoUser(@PathVariable String username) {
-        var result = userService.userPublicResponse(username);
-        return ApiResponse.<UserPublicResponse>builder().result(result).build();
-    }
+
 
     @GetMapping
     public ApiResponse<Page<UserResponse>> getAllUsers(Pageable pageable) {

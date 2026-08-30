@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { categoryService } from '../services/apiServices';
 import { Sparkles, Layers } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export default function CategoryBar({ selectedCategoryId, onSelectCategory }) {
     const fetchCategories = async () => {
       try {
         const data = await categoryService.getAll();
-        setCategories(data || []);
+        setCategories(data);
       } catch (error) {
         console.error('Lỗi lấy danh sách thể loại:', error);
       } finally {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { bookService } from '../services/apiServices';
 import { BookOpen, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';

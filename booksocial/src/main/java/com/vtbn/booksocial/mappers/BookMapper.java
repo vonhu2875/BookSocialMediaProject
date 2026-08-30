@@ -66,6 +66,7 @@ public class BookMapper {
                 .language(book.getLanguage())
                 .viewCount(book.getViewCount())
                 .authorId(book.getAuthor().getId())
+                .status(book.getStatus())
                 .authorUsername(book.getAuthor().getUsername())
                 .categories(
                         book.getCategories()

@@ -3,3 +3,30 @@
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
+
+.scrollbar-chat {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105) transparent;
+  scrollbar-gutter: stable;
+}
+
+.scrollbar-chat::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-chat::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 6px;
+}
+
+.scrollbar-chat::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgb(71 85 105);
+  background-clip: padding-box;
+}
+
+.scrollbar-chat::-webkit-scrollbar-thumb:hover {
+  background: rgb(34 211 238);
+  background-clip: padding-box;
+}

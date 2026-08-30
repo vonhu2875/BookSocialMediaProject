@@ -51,15 +51,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserPublicResponse userPublicResponse(String username) {
-        User user = userRepository.findByUsername(username);
-        if(user == null) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        }
-        return userMapper.toPublicResponse(user);
-    }
-
-    @Override
     public void changePassword(String username, ChangePasswordRequest request) {
         User user = userRepository.findByUsername(username);
         if(user == null)

@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import { authService } from '../services/apiServices';
 
 export const AuthContext = createContext();
 
@@ -34,9 +35,9 @@ export const AuthProvider = ({ children }) => {
 };
 
   const isAdmin = user?.role === 'ADMIN';
-
+  const isReader = user?.role === 'READER';
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, isAdmin, isReader, loading }}>
       {children}
     </AuthContext.Provider>
   );
