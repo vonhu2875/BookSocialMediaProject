@@ -17,6 +17,7 @@ export const authService = {
   getAllUsers: (page = 0, size = 10) => api.get(`/users?page=${page}&size=${size}`),
   deleteUser: (userId) => api.delete(`/users/${userId}`),
   getUserBooks: (userId) => api.get(`/users/${userId}/books`),
+  changeStatusUser: (userId) => api.put(`/users/${userId}/change-status`),
 };
 
 // ==================== CATEGORIES ====================
@@ -68,10 +69,18 @@ export const bookService = {
 
 export const chapterService = {
   getDetail: (chapterId) => api.get(`/chapters/${chapterId}`),
+  updateChapter: (chapterId, data) => {
+    if (data instanceof FormData) {
+      return api.put(`/chapters/${chapterId}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    return api.put(`/chapters/${chapterId}`, data);
+  },
+  deleteChapter: (chapterId) => api.delete(`/chapters/${chapterId}`),
   summarize: (chapterId) => api.post(`/chapters/${chapterId}/summary`),
   getComments: (chapterId, page = 0, size = 10) => api.get(`/chapters/${chapterId}/comments?page=${page}&size=${size}`),
   addComment: (chapterId, data) => api.post(`/chapters/${chapterId}/comments`, data),
-  deleteChapter: (chapterId) => api.delete(`/chapters/${chapterId}`),
   startQuiz: (chapterId) => api.post(`/chapters/${chapterId}/quizzes/start`),
   generateQuiz: (chapterId) => api.post(`/chapters/${chapterId}/quizzes`),
   chatChapter: (chapterId, data) => api.post(`/chapters/${chapterId}/chat`, data),

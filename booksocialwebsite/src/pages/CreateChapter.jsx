@@ -38,9 +38,13 @@ export default function CreateChapter() {
       await bookService.createChapter(bookId, formData);
       alert('Thêm chương thành công!');
       navigate(`/books/${bookId}`);
-    } catch (requestError) {
-      console.error('Lỗi thêm chương:', requestError);
-      setError(requestError?.message || 'Không thể thêm chương. Vui lòng thử lại.');
+    } catch (error) {
+      if(error?.response?.status === 413){
+        setError('File quá lớn. Vui lòng chọn file nhỏ hơn.');
+      }
+      else{
+        setError(error?.message || 'Không thể thêm chương. Vui lòng thử lại.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -73,11 +77,15 @@ export default function CreateChapter() {
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-300 mb-1">File nội dung <span className="text-rose-400">*</span></label>
-            <label className="flex items-center gap-3 p-4 bg-slate-950 border border-dashed border-slate-700 hover:border-indigo-500 rounded-xl cursor-pointer transition">
+            <div className="flex items-center gap-3 p-4 bg-slate-950 border border-dashed border-slate-700 hover:border-indigo-500 rounded-xl transition">
               <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
-              <span className="text-xs text-slate-300 truncate">{file ? file.name : 'Chọn file nội dung chương'}</span>
-              <input type="file" required onChange={(event) => setFile(event.target.files[0] || null)} className="hidden" />
-            </label>
+              <span className="text-xs text-slate-300 truncate flex-1">{file ? file.name : 'Chọn file nội dung chương'}</span>
+              <input
+                type="file"
+                onChange={(event) => setFile(event.target.files[0] || null)}
+                className="block w-full max-w-[180px] text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white file:cursor-pointer"
+              />
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <Link to={`/books/${bookId}`} className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 transition">Hủy bỏ</Link>

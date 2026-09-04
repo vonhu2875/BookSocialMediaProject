@@ -17,6 +17,7 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    //Không cho trình duyệt submit và reload trang theo cách mặc định
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -26,7 +27,12 @@ export default function Register() {
       alert('Tạo tài khoản thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (err) {
-      setError(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!');
+      if(err.code === 403) {
+        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+      }
+      else {
+        setError(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!');
+      }
     } finally {
       setLoading(false);
     }
@@ -61,7 +67,7 @@ export default function Register() {
         </div>
 
         <div className="text-xs text-slate-500 font-medium z-10 tracking-wider">
-          © 2026 Readora Platform. Built for the next-gen readers.
+          2026 Readora Platform. Built for the next-gen readers.
         </div>
       </div>
 
@@ -71,7 +77,7 @@ export default function Register() {
           
           {/* Căn Giữa Tiêu Đề */}
           <div className="text-center">
-            <h2 className="text-3xl font-black text-slate-900 tracking-wide">Tạo Tài Khoản</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-wide">Tạo tài khoản</h2>
             <p className="text-sm text-slate-500 mt-2 font-medium tracking-wide">Trở thành một phần của cộng đồng Readora</p>
           </div>
 

@@ -24,7 +24,14 @@ export default function Login() {
       login(data);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Tài khoản hoặc mật khẩu không chính xác!');
+      if(err.code === 403)
+      {
+        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+      }
+      else
+      {
+        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!');
+      }
     } finally {
       setLoading(false);
     }
@@ -42,7 +49,11 @@ export default function Login() {
       login(data);
       navigate('/'); // Chuyển hướng sang trang chủ
     }catch (err) {
-      setError(err.message || 'Đăng nhập bằng Google thất bại!');
+      if(err.code === 403) { 
+        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+      }
+      else
+        setError(err.message || 'Đăng nhập bằng Google thất bại!');
     } finally {
       setLoading(false);
     }
@@ -91,7 +102,7 @@ export default function Login() {
           
           {/* Tiêu đề căn giữa + Tracking Wide */}
           <div className="text-center">
-            <h2 className="text-3xl font-black text-slate-900 tracking-wide">Đăng Nhập</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-wide">Đăng nhập</h2>
             <p className="text-sm text-slate-500 mt-2 font-medium tracking-wide">Chào mừng bạn quay trở lại với Readora</p>
           </div>
 

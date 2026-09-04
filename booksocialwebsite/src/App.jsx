@@ -16,6 +16,7 @@ import Bookshelfs from './pages/profiles/BookShelf';
 import MyBooks from './pages/profiles/MyBooks';
 import CreateChapter from './pages/CreateChapter';
 import EditBook from './pages/EditBook';
+import EditChapter from './pages/EditChapter';
 import QuizHistory from './pages/profiles/QuizHistory';
 import AdminDashboard from './pages/AdminDashboard';
 
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
         { path: '/books/create', element: <UploadBook /> },
         { path: '/books/:id/chapters/create', element: <CreateChapter /> },
         { path: '/books/:id/edit', element: <EditBook /> },
+        { path: '/chapters/:chapterId/edit', element: <EditChapter /> },
         { path: '/chapters/:chapterId', element: <ChapterView /> },
         { path: '/chapters/:chapterId/quizzes', element: <QuizView /> },
         { path: '/quiz-attempts/:attemptId', element: <QuizResult /> },

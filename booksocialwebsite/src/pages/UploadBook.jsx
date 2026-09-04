@@ -133,7 +133,7 @@ export default function UploadBook() {
       await bookService.createBook(formData);
       alert('Đăng sách thành công! Sách của bạn đang chờ Admin duyệt.');
       
-      navigate('/profile');
+      navigate('/my-books');
     } catch (err) {
       console.error('Lỗi đăng sách:', err);
       setError(err?.message || err?.response?.data?.message || 'Có lỗi xảy ra khi tạo sách. Vui lòng thử lại.');

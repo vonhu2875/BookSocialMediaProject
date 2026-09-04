@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   ShieldCheck,
   Users,
@@ -12,13 +12,17 @@ import {
   MessageSquareText,
   Star,
   BookText,
+  Layers,
   Clock,
   Ban,
   Search,
   X,
   ArrowLeft,
+  Pencil,
+  Plus,
+  Save,
 } from 'lucide-react';
-import { authService, bookService, chapterService, commentService } from '../services/apiServices';
+import { authService, bookService, categoryService, chapterService, commentService } from '../services/apiServices';
 import { useSearchParams } from 'react-router-dom';
 
 const normalizeList = (payload) => {
@@ -42,11 +46,18 @@ export default function AdminDashboard() {
   const [activeBookStatus, setActiveBookStatus] = useState('ALL');
   const [userSearch, setUserSearch] = useState('');
   const [bookSearch, setBookSearch] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
 
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingBooks, setLoadingBooks] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categoryName, setCategoryName] = useState('');
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
   const [error, setError] = useState('');
 
   // Drawer chi tiết sách
@@ -57,10 +68,24 @@ export default function AdminDashboard() {
   const [bookDetailTab, setBookDetailTab] = useState('overview'); // 'overview' | 'chapters' | 'ratings'
   const [drillChapterId, setDrillChapterId] = useState(null); // chương đang xem bình luận, null = đang ở danh sách chương
 
+  const errorRef = useRef(null);
+  
+ // Hàm hỗ trợ cuộn mượt tới khung báo lỗi
+  const scrollToError = () => {
+    setTimeout(() => {
+      errorRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+    }, 50);
+  };
+
   const tabs = useMemo(
     () => [
       { id: 'users', label: 'Quản lý người dùng' },
       { id: 'books', label: 'Quản lý sách' },
+      { id: 'categories', label: 'Quản lý danh mục' },
     ],
     []
   );
@@ -70,11 +95,12 @@ export default function AdminDashboard() {
       totalUsers: users.length,
       bannedUsers: users.filter((u) => u.active === false).length,
       totalBooks: books.length,
+      totalCategories: categories.length,
       pendingBooks: books.filter((b) => b.status === 'PENDING').length,
       approvedBooks: books.filter((b) => b.status === 'APPROVED').length,
       rejectedBooks: books.filter((b) => b.status === 'REJECTED').length,
     }),
-    [users, books]
+    [users, books, categories]
   );
 
   const bookStatusOptions = [
@@ -104,6 +130,12 @@ export default function AdminDashboard() {
     }
     return list;
   }, [books, activeBookStatus, bookSearch]);
+
+  const filteredCategories = useMemo(() => {
+    const keyword = categorySearch.trim().toLowerCase();
+    if (!keyword) return categories;
+    return categories.filter((category) => (category.name || '').toLowerCase().includes(keyword));
+  }, [categories, categorySearch]);
 
   const fetchUsers = async () => {
     try {
@@ -141,19 +173,39 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Lỗi lấy danh sách sách:', err);
       setError('Không thể tải danh sách sách.');
+      scrollToError();
     } finally {
       setLoadingBooks(false);
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const result = await categoryService.getAll();
+      setCategories(normalizeList(result));
+    } catch (err) {
+      console.error('Lỗi lấy danh sách danh mục:', err);
+      setError('Không thể tải danh sách danh mục.');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   const refreshAdminData = async () => {
     setError('');
-    await Promise.all([fetchUsers(), fetchBooks()]);
+    await Promise.all([fetchUsers(), fetchBooks(), fetchCategories()]);
   };
 
   useEffect(() => {
     refreshAdminData();
   }, []);
+  // Cuộn tới lỗi khi state error thay đổi
+    useEffect(() => {
+      if (error && errorRef.current) {
+        scrollToError();
+      }
+    }, [error]);
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     const statusParam = searchParams.get('status');
@@ -185,6 +237,7 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Lỗi tải chi tiết sách:', err);
       setError('Không thể tải chi tiết sách cho admin.');
+      scrollToError();
     } finally {
       setLoadingDetailsForBook((prev) => ({ ...prev, [bookId]: false }));
     }
@@ -205,6 +258,8 @@ export default function AdminDashboard() {
       }));
     } catch (err) {
       console.error('Lỗi tải bình luận:', err);
+      setError('Không thể tải bình luận.');
+      scrollToError();  
     }
   };
 
@@ -229,6 +284,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleChangeUserStatus = async (user) => {
+    const actionLabel = user.active ? 'khóa' : 'mở khóa';
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn ${actionLabel} tài khoản "${user.fullName || user.username || 'người dùng'}"?`);
+    if (!confirmed) return;
+
+    try {
+      await authService.changeStatusUser(user.id);
+      await fetchUsers();
+    } catch (err) {
+      if(error.code === 1051)
+      {
+        setError('Không thể thay đổi trạng thái của chính mình!');
+        scrollToError();
+      }
+      else{
+        console.error('Lỗi thay đổi trạng thái người dùng:', err);
+        setError('Không thể thay đổi trạng thái người dùng.');
+        scrollToError();  
+      }
+    }
+  };
+
   const handleDeleteUser = async (userId) => {
     const confirmed = window.confirm('Bạn có chắc chắn muốn xóa người dùng này khỏi hệ thống?');
     if (!confirmed) return;
@@ -237,8 +314,15 @@ export default function AdminDashboard() {
       await authService.deleteUser(userId);
       await fetchUsers();
     } catch (err) {
-      console.error('Lỗi xóa người dùng:', err);
-      alert('Không thể xóa người dùng.');
+      if(error.code === 1052){
+        setError('Không thể xóa người dùng của chính mình!');
+        scrollToError();
+      }
+      else {
+        console.error('Lỗi xóa người dùng:', err);
+        setError('Không thể xóa người dùng.');
+        scrollToError();
+      }
     }
   };
 
@@ -257,7 +341,8 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Lỗi cập nhật trạng thái sách:', err);
-      alert('Không thể cập nhật trạng thái sách.');
+      setError('Không thể cập nhật trạng thái sách.');
+      scrollToError();
     }
   };
 
@@ -271,7 +356,61 @@ export default function AdminDashboard() {
       await fetchBooks();
     } catch (err) {
       console.error('Lỗi xóa sách:', err);
-      alert('Không thể xóa sách.');
+      setError('Không thể xóa sách.');
+      scrollToError();
+    }
+  };
+
+  const resetCategoryForm = () => {
+    setCategoryName('');
+    setEditingCategoryId(null);
+    setShowCategoryForm(false);
+  };
+
+  const handleEditCategory = (category) => {
+    setEditingCategoryId(category.id);
+    setCategoryName(category.name || '');
+    setShowCategoryForm(true);
+  };
+
+  const handleSaveCategory = async (event) => {
+    event.preventDefault();
+    const name = categoryName.trim();
+    if (!name) {
+      setError('Vui lòng nhập tên danh mục.');
+      return;
+    }
+
+    try {
+      setSavingCategory(true);
+      if (editingCategoryId) {
+        await categoryService.update(editingCategoryId, { name });
+      } else {
+        await categoryService.create({ name });
+      }
+      resetCategoryForm();
+      await fetchCategories();
+    } catch (err) {
+      console.error('Lỗi lưu danh mục:', err);
+      setError(err?.message || 'Không thể lưu danh mục.');
+      scrollToError();
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    const confirmed = window.confirm('Bạn có chắc chắn muốn xóa danh mục này không?');
+    if (!confirmed) return;
+
+    try {
+      await categoryService.delete(categoryId);
+      if (editingCategoryId === categoryId) resetCategoryForm();
+      setCategories((prev) => prev.filter((category) => category.id !== categoryId));
+    } catch (err) {
+      console.error('Lỗi xóa danh mục:', err);
+      setError(err?.message || 'Không thể xóa danh mục. Danh mục có thể đang được sử dụng bởi sách.');
+      scrollToError();
     }
   };
 
@@ -290,7 +429,8 @@ export default function AdminDashboard() {
       }));
     } catch (err) {
       console.error('Lỗi xóa rating:', err);
-      alert('Không thể xóa đánh giá.');
+      setError('Không thể xóa đánh giá.');
+      scrollToError();
     }
   };
 
@@ -313,7 +453,8 @@ export default function AdminDashboard() {
       if (drillChapterId === chapterId) setDrillChapterId(null);
     } catch (err) {
       console.error('Lỗi xóa chương:', err);
-      alert('Không thể xóa chương.');
+      setError('Không thể xóa chương.');
+      scrollToError();
     }
   };
 
@@ -335,7 +476,8 @@ export default function AdminDashboard() {
       }));
     } catch (err) {
       console.error('Lỗi xóa bình luận:', err);
-      alert('Không thể xóa bình luận.');
+      setError('Không thể xóa bình luận.');
+      scrollToError();
     }
   };
 
@@ -367,18 +509,19 @@ export default function AdminDashboard() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+        <div ref={errorRef} className="flex items-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {[
           { label: 'Tổng người dùng', value: stats.totalUsers, icon: Users, color: 'text-indigo-300 border-indigo-500/20 bg-indigo-500/10' },
           { label: 'Tài khoản bị khóa', value: stats.bannedUsers, icon: Ban, color: 'text-rose-300 border-rose-500/20 bg-rose-500/10' },
           { label: 'Tổng số sách', value: stats.totalBooks, icon: BookOpen, color: 'text-sky-300 border-sky-500/20 bg-sky-500/10' },
           { label: 'Sách chờ duyệt', value: stats.pendingBooks, icon: Clock, color: 'text-amber-300 border-amber-500/20 bg-amber-500/10' },
+          { label: 'Tổng danh mục', value: stats.totalCategories, icon: Layers, color: 'text-emerald-300 border-emerald-500/20 bg-emerald-500/10' },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div className={`mb-2 inline-flex h-8 w-8 items-center justify-center rounded-lg border ${s.color}`}>
@@ -466,12 +609,25 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => handleDeleteUser(user.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-rose-300 transition hover:bg-rose-500/20"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" /> Xóa
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleChangeUserStatus(user)}
+                            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                              user.active
+                                ? 'border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                                : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
+                            }`}
+                          >
+                            {user.active ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                            {user.active ? 'Khóa' : 'Mở khóa'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-rose-300 transition hover:bg-rose-500/20"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Xóa
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -576,6 +732,108 @@ export default function AdminDashboard() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                           <ChevronRight className="h-4 w-4 self-center text-slate-500" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      {activeTab === 'categories' && (
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-white">Danh sách danh mục</h2>
+              <p className="mt-1 text-xs text-slate-400">{filteredCategories.length}/{categories.length} danh mục</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCategoryId(null);
+                setCategoryName('');
+                setShowCategoryForm(true);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
+            >
+              <Plus className="h-4 w-4" /> Thêm danh mục
+            </button>
+          </div>
+
+          <div className="relative mb-4">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input
+              value={categorySearch}
+              onChange={(event) => setCategorySearch(event.target.value)}
+              placeholder="Tìm theo tên danh mục..."
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+            />
+          </div>
+
+          {showCategoryForm && (
+            <form onSubmit={handleSaveCategory} className="mb-5 flex flex-col gap-2 rounded-2xl border border-indigo-500/20 bg-slate-950/50 p-3 sm:flex-row">
+              <input
+                autoFocus
+                value={categoryName}
+                onChange={(event) => setCategoryName(event.target.value)}
+                placeholder="Nhập tên danh mục..."
+                className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
+                maxLength={100}
+              />
+              <button
+                type="submit"
+                disabled={savingCategory}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {editingCategoryId ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {savingCategory ? 'Đang lưu...' : editingCategoryId ? 'Lưu thay đổi' : 'Thêm danh mục'}
+              </button>
+              <button
+                type="button"
+                onClick={resetCategoryForm}
+                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:text-white"
+              >
+                Hủy
+              </button>
+            </form>
+          )}
+
+          {loadingCategories ? (
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-sm text-slate-400">Đang tải danh mục...</div>
+          ) : filteredCategories.length === 0 ? (
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-sm text-slate-400">
+              {categorySearch ? 'Không tìm thấy danh mục phù hợp.' : 'Chưa có danh mục nào.'}
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-slate-800">
+              <table className="min-w-full divide-y divide-slate-800 text-sm">
+                <thead className="bg-slate-950/60">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">Tên danh mục</th>
+                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-400">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800 bg-slate-950/30">
+                  {filteredCategories.map((category) => (
+                    <tr key={category.id} className="transition hover:bg-slate-900/60">
+                      <td className="px-4 py-3 font-semibold text-white">{category.name}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEditCategory(category)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-sky-300 transition hover:bg-sky-500/20"
+                          >
+                            <Pencil className="h-3.5 w-3.5" /> Sửa
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(category.id)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-rose-300 transition hover:bg-rose-500/20"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Xóa
+                          </button>
                         </div>
                       </td>
                     </tr>

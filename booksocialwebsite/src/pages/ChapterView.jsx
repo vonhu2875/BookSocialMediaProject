@@ -268,13 +268,23 @@ export default function ChapterView() {
               Chương {chapter.chapterNumber}: {chapter.title}
             </span>
 
-            <button
-              onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-              className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition"
-              title="Tùy chỉnh giao diện đọc"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/chapters/${chapterId}/edit`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-indigo-200 transition hover:border-indigo-400 hover:bg-indigo-500/20"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Sửa
+              </Link>
+
+              <button
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                title="Tùy chỉnh giao diện đọc"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="w-full h-1 bg-slate-800/40">
