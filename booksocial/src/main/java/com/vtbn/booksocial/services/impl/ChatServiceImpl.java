@@ -57,7 +57,8 @@ public class ChatServiceImpl {
     public ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest request) {
         User user = getCurrentUser(authentication);
         Chapter chapter = chapterRepository.findById(chapterId);
-        if (chapter == null) throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
+        if (chapter == null)
+            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
 
         List<ChatTurn> history = getRecentHistory(user.getId(), chapterId, null);
         String filterExpression = "chapterId == " + chapterId;
@@ -152,7 +153,8 @@ public class ChatServiceImpl {
                 ? aiChatHistoryRepository.findTop6ByUserIdAndChapterIdOrderByCreatedDateDesc(userId, chapterId)
                 : aiChatHistoryRepository.findTop6ByUserIdAndBookIdAndChapterIsNullOrderByCreatedDateDesc(userId, bookId);
 
-        if (recentDesc.isEmpty()) return Collections.emptyList();
+        if (recentDesc.isEmpty())
+            return Collections.emptyList();
         return recentDesc.reversed().stream()
                 .map(h -> new ChatTurn(h.getQuestion(), h.getAnswer()))
                 .toList();

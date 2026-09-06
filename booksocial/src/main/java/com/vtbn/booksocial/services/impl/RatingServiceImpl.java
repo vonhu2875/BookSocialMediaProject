@@ -176,7 +176,6 @@ public class RatingServiceImpl implements RatingService {
             throw new AppException(ErrorCode.ACCESS_DENIED);
         }
 
-
         // Update
         rating.setStar(request.getStar());
         rating.setReview(request.getReview());

@@ -155,7 +155,15 @@ export default function BookDetail() {
 
           {/* Meta */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-medium text-slate-400">
-            {book.authorUsername ? (
+            {book.authorUsername && book.authorId ? (
+              <Link
+                to={`/?authorId=${encodeURIComponent(book.authorId)}`}
+                className="flex items-center gap-1.5 text-indigo-300 hover:text-indigo-200 hover:underline transition"
+              >
+                <User className="w-4 h-4 text-indigo-400" />
+                {book.authorUsername}
+              </Link>
+            ) : book.authorUsername ? (
               <span className="flex items-center gap-1.5 text-indigo-300">
                 <User className="w-4 h-4 text-indigo-400" />
                 {book.authorUsername}

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public enum ErrorCode {
+    USER_FORBIDDEN(403, "User forbidden", HttpStatus.FORBIDDEN),
     USER_ALREADY_EXISTS(
             1001,
             "User already exists",
@@ -109,6 +110,12 @@ public enum ErrorCode {
     CHAPTER_NOT_IN_BOOK(1048, "Chapter not in book", HttpStatus.BAD_REQUEST),
     AI_CHAT_FAILED(1049, "AI chat failed", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_BOOK_FILE_IMAGE(1050, "Invalid book file image", HttpStatus.BAD_REQUEST),
+    USER_CANNOT_CHANGE_SHELF_STATUS(1051, "User cannot change yourshelf status", HttpStatus.BAD_REQUEST),
+    USER_CANNOT_DELETE_SHELF(1052, "User cannot delete yourshelf", HttpStatus.BAD_REQUEST),
+    ACCOUNT_DISABLED(1053, "Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt", HttpStatus.FORBIDDEN),
+    AI_SERVICE_UNAVAILABLE(1054, "Không thể kết nối tới Trợ lý AI, vui lòng thử lại sau", HttpStatus.SERVICE_UNAVAILABLE),
+    AI_RATE_LIMIT_EXCEEDED(1055, "Hệ thống đang quá tải, vui lòng chờ trong giây lát", HttpStatus.TOO_MANY_REQUESTS),
+    DATA_INTEGRITY_VIOLATION(1056, "Dữ liệu đã tồn tại hoặc vi phạm ràng buộc, vui lòng kiểm tra lại thông tin", HttpStatus.CONFLICT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -43,17 +43,21 @@ public class UserController {
         return ApiResponse.<Void>builder().message("change password success").build();
     }
 
-
-
     @GetMapping
     public ApiResponse<Page<UserResponse>> getAllUsers(Pageable pageable) {
         var result = userService.getAllUser(pageable);
         return ApiResponse.<Page<UserResponse>>builder().result(result).build();
     }
 
+    @PutMapping("/{userId}/change-status")
+    public ApiResponse<Void> changeStatusUser(Authentication authentication, @PathVariable int userId) {
+        userService.changeStatusUser(authentication, userId);
+        return ApiResponse.<Void>builder().message("Change status user success").build();
+    }
+
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
+    public ApiResponse<Void> deleteUser(Authentication authentication,@PathVariable int id) {
+        userService.deleteUser(authentication, id);
         return ApiResponse.<Void>builder().message("delete user success").build();
     }
 

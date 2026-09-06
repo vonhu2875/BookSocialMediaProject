@@ -10,6 +10,7 @@ export default function Home() {
   
   // Lấy keyword từ URL (nếu có bấm Tìm kiếm trên Navbar)
   const keywordParam = searchParams.get('keyword') || '';
+  const authorIdParam = searchParams.get('authorId') || '';
 
   // State quản lý danh sách sách và phân trang
   const [books, setBooks] = useState([]);
@@ -25,8 +26,9 @@ export default function Home() {
       try {
         const params = {
           page: page,
-          size: 10,
+          size: 2,
           keyword: keywordParam || undefined,
+          authorId: authorIdParam || undefined,
           categoryIds: selectedCategoryId ? [selectedCategoryId] : undefined,
         };
 
@@ -42,7 +44,7 @@ export default function Home() {
     };
 
     fetchBooks();
-  }, [selectedCategoryId, page, keywordParam]);
+  }, [selectedCategoryId, page, keywordParam, authorIdParam]);
 
   // Xử lý khi bấm chuyển Thể Loại
   const handleSelectCategory = (categoryId) => {

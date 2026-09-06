@@ -50,11 +50,9 @@ public class AuthServiceImpl implements AuthService {
     private String googleClientId;
     @Override
     public UserResponse register(RegisterRequest request) {
-
         if(userRepository.existsByUsername(request.getUsername())){
             throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
         }
-
         if(userRepository.existsByEmail(request.getEmail())){
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -72,17 +70,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+//      //lấy ra principal, tức là đối tượng đại diện cho user đã được xác thực.
         UserDetails userDetails = (UserDetails)authentication.getPrincipal();
         if(userDetails == null)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         String token = jwtService.generateToken(userDetails);
-
         User user = userRepository.findByUsername(request.getUsername());
         UserResponse userResponse = userMapper.toResponse(user);
-
         return LoginResponse.builder().token(token).tokenType("Bearer").user(userResponse).build();
     }
 
@@ -101,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse googleLogin(GoogleLoginRequest request) {
         try {
             // 1. Khởi tạo Google Verifier với Client ID
+            //Kiểm tra Google ID Token mà Frontend gửi lên có hợp lệ hay không.
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                     new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(googleClientId))
@@ -121,7 +117,6 @@ public class AuthServiceImpl implements AuthService {
 
             // 4. Tìm kiếm User theo Email trong Database
             User user = userRepository.findByEmail(email);
-
             // 5. Nếu chưa có -> Tạo tài khoản mới (Auto-register)
             if (user == null) {
                 String baseUsername = email.split("@")[0];
@@ -144,23 +139,18 @@ public class AuthServiceImpl implements AuthService {
 
                 user = userRepository.save(user);
             }
-
+            if(!user.isActive())
+                throw new AppException(ErrorCode.USER_FORBIDDEN);
             // 6. Tạo UserDetails chuẩn từ CustomUserDetailService của dự án
             UserDetails userDetails = customUserDetailService.loadUserByUsername(user.getUsername());
-
             // 7. Sinh JWT Token bằng JwtService của dự án
             String token = jwtService.generateToken(userDetails);
 
             // 8. Map thông tin User sang UserResponse
             UserResponse userResponse = userMapper.toResponse(user);
 
-            // 9. Trả về LoginResponse đồng bộ hoàn toàn với hàm login() thường
-            return LoginResponse.builder()
-                    .token(token)
-                    .tokenType("Bearer")
-                    .user(userResponse)
-                    .build();
-
+            // 9. Trả về LoginResponse
+            return LoginResponse.builder().token(token).tokenType("Bearer").user(userResponse).build();
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {

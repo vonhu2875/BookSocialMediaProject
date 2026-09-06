@@ -81,7 +81,6 @@ public class BookServiceImpl implements BookService {
             List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
             if(categories.size() != request.getCategoryIds().size())
                 throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-
             book.setCategories(new HashSet<>(categories));
         }
 
@@ -124,7 +123,7 @@ public class BookServiceImpl implements BookService {
         if(book == null)
             throw  new AppException(ErrorCode.BOOK_NOT_FOUND);
         if(!book.getAuthor().getUsername().equals(username))
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USER_FORBIDDEN);
 
         if(!book.getTitle().equals(request.getTitle()) && bookRepository.existsByTitleAndAuthor_Username(request.getTitle(), username))
             throw new AppException(ErrorCode.BOOK_ALREADY_EXISTS);
@@ -162,7 +161,7 @@ public class BookServiceImpl implements BookService {
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isAuthor = book.getAuthor().getUsername().equals(username);
         if (!isAdmin && !isAuthor) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USER_FORBIDDEN);
         }
         bookRepository.delete(book);
     }

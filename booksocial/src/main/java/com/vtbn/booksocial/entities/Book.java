@@ -14,7 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "books")
+@Table(name = "books", uniqueConstraints = {@UniqueConstraint(columnNames = {"author_id", "title"})})
 public class Book extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

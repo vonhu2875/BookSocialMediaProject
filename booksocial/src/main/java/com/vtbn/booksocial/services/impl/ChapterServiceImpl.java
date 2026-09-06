@@ -47,11 +47,10 @@ public class ChapterServiceImpl implements ChapterService {
         Book book = bookRepository.findById(bookId);
         if(book == null)
             throw new AppException(ErrorCode.BOOK_NOT_FOUND);
-        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isAuthor = book.getAuthor().getUsername().equals(username);
 
-        if(!isAdmin && !isAuthor)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if(!isAuthor)
+            throw new AppException(ErrorCode.USER_FORBIDDEN);
 
         if(request.getChapterNumber() <= 0)
             throw new AppException(ErrorCode.CHAPTER_NUMBER_INVALID);
@@ -109,10 +108,10 @@ public class ChapterServiceImpl implements ChapterService {
         if (chapter == null)
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         Book book = chapter.getBook();
-        boolean isAdmin = user.getRole() == UserRole.ADMIN;
+//        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isAuthor = book.getAuthor().getUsername().equals(username);
-        if (!isAdmin && !isAuthor)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!isAuthor)
+            throw new AppException(ErrorCode.USER_FORBIDDEN);
         if (request.getChapterNumber() <= 0)
             throw new AppException(ErrorCode.CHAPTER_NUMBER_INVALID);
         if (chapterRepository.existsByBookIdAndChapterNumberAndIdNot(book.getId(),request.getChapterNumber(),chapterId)) {

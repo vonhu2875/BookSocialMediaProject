@@ -5,6 +5,7 @@ import com.vtbn.booksocial.dto.request.UpdateProfileRequest;
 import com.vtbn.booksocial.dto.response.UserPublicResponse;
 import com.vtbn.booksocial.dto.response.UserResponse;
 import com.vtbn.booksocial.entities.User;
+import com.vtbn.booksocial.enums.UserRole;
 import com.vtbn.booksocial.exceptions.AppException;
 import com.vtbn.booksocial.exceptions.ErrorCode;
 import com.vtbn.booksocial.mappers.UserMapper;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,10 +70,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(int id) {
+    public void changeStatusUser(Authentication authentication, int userId) {
+        User userChange = userRepository.findById(userId);
+        if(userChange == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        if(userChange.getUsername().equals(authentication.getName()))
+            throw new AppException(ErrorCode.USER_CANNOT_CHANGE_SHELF_STATUS);
+        userChange.setActive(!userChange.isActive());
+        userRepository.save(userChange);
+    }
+
+    @Override
+    public void deleteUser(Authentication authentication, int id) {
         User user = userRepository.findById(id);
         if(user == null)
             throw new AppException(ErrorCode.USER_NOT_FOUND);
+        if(user.getUsername().equals(authentication.getName()))
+            throw new AppException(ErrorCode.USER_CANNOT_DELETE_SHELF);
         userRepository.delete(user);
     }
 }

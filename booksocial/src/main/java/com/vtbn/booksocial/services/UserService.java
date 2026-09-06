@@ -7,6 +7,7 @@ import com.vtbn.booksocial.dto.response.UserResponse;
 import com.vtbn.booksocial.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 
 public interface UserService {
     UserResponse getInfoUser(String username);
@@ -14,5 +15,6 @@ public interface UserService {
 
     void changePassword(String username, ChangePasswordRequest request);
     Page<UserResponse> getAllUser(Pageable pageable);
-    void deleteUser(int id);
+    void changeStatusUser(Authentication authentication, int userId);
+    void deleteUser(Authentication authentication, int id);
 }

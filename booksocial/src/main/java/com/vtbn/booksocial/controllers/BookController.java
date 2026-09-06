@@ -81,7 +81,7 @@ public class BookController {
 
     //CHAPTER
     @PostMapping("/{bookId}/chapters")
-    public ApiResponse<ChapterDetailResponse> createChapter(Authentication authentication, @PathVariable int bookId, @ModelAttribute ChapterRequest request){
+    public ApiResponse<ChapterDetailResponse> createChapter(Authentication authentication, @PathVariable int bookId, @Valid @ModelAttribute ChapterRequest request){
         ChapterDetailResponse chapterDetailResponse = chapterService.createChapter(authentication, bookId, request);
         return ApiResponse.<ChapterDetailResponse>builder().result(chapterDetailResponse).build();
     }

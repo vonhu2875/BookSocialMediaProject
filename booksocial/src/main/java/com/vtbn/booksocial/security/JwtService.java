@@ -15,10 +15,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-
     @Value("${jwt.secret}")
     private String secretKey;
-
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
@@ -46,18 +44,15 @@ public class JwtService {
 
 //Lấy JWT ID (jti) từ token.
     public String extractTokenId(String token){
-
         return extractClaim(token, Claims::getId);
     }
 
 //    Lấy thông tin Issuer (hệ thống phát hành token).
     public String extractIssuer(String token){
-
         return extractClaim(token, Claims::getIssuer);
     }
 //Lấy thời điểm hết hạn của JWT.
     public Date extractExpiration(String token) {
-
         return extractClaim(token, Claims::getExpiration);
     }
 //Kiểm tra JWT đã hết hạn hay chưa.
