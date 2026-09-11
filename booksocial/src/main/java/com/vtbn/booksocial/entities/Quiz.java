@@ -20,14 +20,11 @@ public class Quiz extends BaseEntity{
     private int id;
     @Column(columnDefinition = "TEXT", nullable = false)
     private String summary;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
-
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY,  cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<QuizAttempt> quizAttempts;
-
-    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quiz", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Question> questions;
 }

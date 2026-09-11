@@ -30,6 +30,7 @@ public class BookshelfServiceImpl implements BookshelfService {
     private final UserRepository userRepository;
     private final BookshelfMapper bookshelfMapper;
     private final ChapterRepository chapterRepository;
+
     @Override
     public BookshelfResponse addToBookshelf(Authentication authentication, int bookId) {
         // 1. Lấy user đang đăng nhập
@@ -186,5 +187,44 @@ public class BookshelfServiceImpl implements BookshelfService {
 
         // 8. Lưu bookshelf
         bookshelfRepository.save(bookshelf);
+    }
+
+    @Override
+    public void addBookFavorite(Authentication authentication, int bookId) {
+        //Lấy user đang đăng nhập
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        Book book = bookRepository.findById(bookId);
+        if (book == null) {
+            throw new AppException(ErrorCode.BOOK_NOT_FOUND);
+        }
+        Bookshelf bookshelf = bookshelfRepository.findByUserIdAndBookId(user.getId(),bookId);
+        //Kiểm tra user đã thêm sách này chưa
+        if (bookshelf != null) {
+            bookshelf.setFavorite(!bookshelf.isFavorite());
+        }
+        else
+            bookshelf = Bookshelf.builder().user(user).book(book).status(BookshelfStatus.READING).isFavorite(false).lastReadChapter(null).build();
+        // 5. Lưu database
+        bookshelfRepository.save(bookshelf);
+    }
+
+    @Override
+    public List<BookshelfResponse> getMyFavoriteBookshelf(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<Bookshelf> favoriteBookshelfs = bookshelfRepository.findByUserIdAndIsFavoriteTrue(user.getId());
+
+        return favoriteBookshelfs.stream()
+                .map(bookshelfMapper::toBookshelfResponse)
+                .toList();
     }
 }

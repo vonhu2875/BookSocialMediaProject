@@ -12,4 +12,5 @@ public interface BookshelfRepository extends JpaRepository<Bookshelf, Integer> {
     boolean existsByUserIdAndBookId(int userId, int bookId);
     Bookshelf findByUserIdAndBookId(int userId, int bookId);
     List<Bookshelf> findByUserId(int userId);
+    List<Bookshelf>findByUserIdAndIsFavoriteTrue(int userId);
 }

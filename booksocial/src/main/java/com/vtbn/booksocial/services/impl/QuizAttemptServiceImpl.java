@@ -37,7 +37,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private final UserAnswerMapper userAnswerMapper;
     private final QuizAttemptMapper quizAttemptMapper;
     private final UserAnswerRepository userAnswerRepository;
-
     @Override
     @Transactional
     public QuizAttemptDetailResponse submitQuiz(Authentication authentication, int quizId, QuizAttemptRequest request) {
@@ -138,8 +137,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         }
 
         // 11. Lưu QuizAttempt
-        // Cascade sẽ lưu UserAnswer
-
+        userAnswerRepository.saveAll(userAnswers);
         QuizAttempt savedAttempt = quizAttemptRepository.save(quizAttempt);
         // 12. Trả kết quả
 

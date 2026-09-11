@@ -37,59 +37,42 @@ public class QuizServiceImpl implements QuizService {
     @Override
     @Transactional
     public QuizDetailResponse generateQuiz(int chapterId) {
-
         Chapter chapter = chapterRepository.findById(chapterId);
-
         if (chapter == null) {
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         }
-        // 2. Lấy summary
+        //Lấy summary
         String summary = chapter.getSummary();
-
-        // 3. Nếu chưa có summary => tự động tạo bằng AI
+        //Nếu chưa có summary => tự động tạo bằng AI
         if (summary == null || summary.isBlank()) {
-
             summary = aiService.summaryChapter(chapter.getContent());
-
             if (summary == null || summary.isBlank()) {
                 throw new AppException(ErrorCode.GENERATE_SUMMARY_FAILED);
             }
-
             // Lưu summary vào Chapter
             chapter.setSummary(summary);
             chapterRepository.save(chapter);
         }
-
-        // 4. Dùng summary để Gemini sinh Quiz
+        //Dùng summary để Gemini sinh Quiz
         QuizAIResponse aiResponse = aiService.generateQuiz(summary);
 
-        if (aiResponse == null
-                || aiResponse.getQuestions() == null
-                || aiResponse.getQuestions().isEmpty()) {
+        if (aiResponse == null || aiResponse.getQuestions() == null || aiResponse.getQuestions().isEmpty()) {
             throw new AppException(ErrorCode.GENERATE_QUIZ_FAILED);
         }
-
-        // 5. Tạo Quiz
+        //Tạo quiz
         Quiz quiz = quizMapper.toQuiz(summary, chapter);
-
-        // 6. Lưu Quiz để có ID
+        //Lưu Quiz
         quizRepository.save(quiz);
 
-        // 7. Tạo Questions
+        // Tạo questions
         List<Question> questions = new ArrayList<>();
-
         for (QuestionAIResponse questionResponse : aiResponse.getQuestions()) {
-
-            Question question =
-                    questionMapper.toQuestion(questionResponse, quiz);
-
+            Question question = questionMapper.toQuestion(questionResponse, quiz);
             questions.add(question);
         }
-
-        // 8. Lưu toàn bộ Questions
+        //Lưu toàn bộ Questions
         questionRepository.saveAll(questions);
-
-        // 9. Trả Quiz + Questions
+        //Trả quiz và questions
         return quizMapper.toQuizDetailResponse(quiz, questions);
     }
 
@@ -105,7 +88,7 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public QuizDetailResponse startQuiz(Authentication authentication, int chapterId) {
-        // 1. Lấy user hiện tại
+        //Lấy user hiện tại
         String username = authentication.getName();
 
         User user = userRepository.findByUsername(username);
@@ -114,39 +97,27 @@ public class QuizServiceImpl implements QuizService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 2. Kiểm tra chapter
+        //Kiểm tra chapter
         Chapter chapter = chapterRepository.findById(chapterId);
 
         if (chapter == null) {
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         }
 
-        // 3. Lấy tất cả quiz của chapter
+        //Lấy tất cả quiz của chapter
         List<Quiz> quizzes = quizRepository.findByChapterId(chapterId);
 
-        // 4. Tìm quiz mà user chưa từng làm
+        //Tìm quiz mà user chưa từng làm
         for (Quiz quiz : quizzes) {
-
-            boolean hasAttempted =
-                    quizAttemptRepository.existsByQuizIdAndUserId(
-                            quiz.getId(),
-                            user.getId()
-                    );
+            boolean hasAttempted = quizAttemptRepository.existsByQuizIdAndUserId(quiz.getId(),user.getId());
 
             // User chưa từng làm quiz này
             if (!hasAttempted) {
-
                 List<Question> questions = questionRepository.findByQuizId(quiz.getId());
-
-                return quizMapper.toQuizDetailResponse(
-                        quiz,
-                        questions
-                );
+                return quizMapper.toQuizDetailResponse(quiz,questions);
             }
         }
-
-        // 5. Nếu không còn quiz nào chưa làm
-        //    → tạo một quiz mới bằng AI
+        //Nếu không còn quiz nào chưa làm tạo một quiz mới bằng AI
         return generateQuiz(chapterId);
     }
 
@@ -170,7 +141,6 @@ public class QuizServiceImpl implements QuizService {
         if (hasAttempt) {
             throw new AppException(ErrorCode.QUIZ_ALREADY_ATTEMPTED);
         }
-
         quizRepository.delete(quiz);
     }
 }

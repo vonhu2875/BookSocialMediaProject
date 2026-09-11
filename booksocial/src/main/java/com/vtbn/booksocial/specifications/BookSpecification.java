@@ -9,8 +9,7 @@ import java.util.List;
 
 public class BookSpecification {
     public static Specification<Book> hasStatus(BookStatus status) {
-        return (root, query,
-                criteriaBuilder) ->criteriaBuilder.equal(root.get("status"),status);
+        return (root, query,criteriaBuilder) -> criteriaBuilder.equal(root.get("status"),status);
     }
 
     public static Specification<Book> hasCategories(List<Integer> categoryIds) {
@@ -18,7 +17,6 @@ public class BookSpecification {
             if (categoryIds == null || categoryIds.isEmpty()) {
                 return null;
             }
-            // Tránh duplicate Book do ManyToMany JOIN
             query.distinct(true);
             return root.join("categories")
                     .get("id")

@@ -16,7 +16,4 @@ public interface ChapterService {
     ChapterDetailResponse updateChapter(Authentication authentication, int chapterId, ChapterRequest request);
     void deleteChapter(Authentication authentication, int chapterId);
     ChapterSummaryResponse summaryChapter(Authentication authentication, int chapterId);
-    ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest chatRequest);
-    Page<AIChatHistoryResponse> getChatHistory(Authentication authentication, int chapterId, Pageable pageable);
-    void deleteChatHistory(Authentication authentication, int chapterId);
 }

@@ -2,10 +2,7 @@ package com.vtbn.booksocial.controllers;
 
 import com.vtbn.booksocial.dto.request.*;
 import com.vtbn.booksocial.dto.response.*;
-import com.vtbn.booksocial.services.BookService;
-import com.vtbn.booksocial.services.BookshelfService;
-import com.vtbn.booksocial.services.ChapterService;
-import com.vtbn.booksocial.services.RatingService;
+import com.vtbn.booksocial.services.*;
 import com.vtbn.booksocial.services.impl.ChatServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,7 @@ public class BookController {
     private final ChapterService chapterService;
     private final RatingService ratingService;
     private final BookshelfService bookshelfService;
-    private final ChatServiceImpl chatService;
+    private final ChatService chatService;
     @PostMapping
     public ApiResponse<BookListResponse> createBook(Authentication authentication, @ModelAttribute BookRequest request) {
         BookListResponse bookListResponse = bookService.createBook(authentication, request);
@@ -151,6 +148,12 @@ public class BookController {
         return ApiResponse.<Void>builder()
                 .message("Update reading progress success")
                 .build();
+    }
+
+    @PutMapping("/{bookId}/bookshelfs/favorite")
+    public ApiResponse<Void> updateBookFavorite(Authentication authentication, @PathVariable int bookId){
+        bookshelfService.addBookFavorite(authentication, bookId);
+        return ApiResponse.<Void>builder().message("update book favorite success").build();
     }
 
     @PostMapping("/{id}/view")

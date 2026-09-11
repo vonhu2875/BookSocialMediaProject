@@ -15,6 +15,7 @@ import com.vtbn.booksocial.repositories.AIChatHistoryRepository;
 import com.vtbn.booksocial.repositories.BookRepository;
 import com.vtbn.booksocial.repositories.ChapterRepository;
 import com.vtbn.booksocial.repositories.UserRepository;
+import com.vtbn.booksocial.services.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
@@ -31,7 +32,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ChatServiceImpl {
+public class ChatServiceImpl implements ChatService {
 
     private final UserRepository userRepository;
     private final ChapterRepository chapterRepository;
@@ -52,7 +53,24 @@ public class ChatServiceImpl {
             LỊCH SỬ HỘI THOẠI GẦN ĐÂY:
             %s
             """;
+    private User getCurrentUser(Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if (user == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
+        return user;
+    }
 
+    private List<ChatTurn> getRecentHistory(int userId, Integer chapterId, Integer bookId) {
+        List<AIChatHistory> recentDesc = chapterId != null ? aiChatHistoryRepository.findTop6ByUserIdAndChapterIdOrderByCreatedDateDesc(userId, chapterId):
+                aiChatHistoryRepository.findTop6ByUserIdAndBookIdAndChapterIsNullOrderByCreatedDateDesc(userId, bookId);
+
+        if (recentDesc.isEmpty())
+            return Collections.emptyList();
+        return recentDesc.reversed().stream()
+                .map(h -> new ChatTurn(h.getQuestion(), h.getAnswer()))
+                .toList();
+    }
+    //chapter
+    @Override
     @Transactional
     public ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest request) {
         User user = getCurrentUser(authentication);
@@ -77,7 +95,24 @@ public class ChatServiceImpl {
 
         return ChatResponse.builder().question(request.getQuestion()).answer(answer).build();
     }
+    @Override
+    public Page<AIChatHistoryResponse> getChatHistory(Authentication authentication, int chapterId, Pageable pageable) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if(user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        Page<AIChatHistory> aiChatHistories = aiChatHistoryRepository.findByUserIdAndChapterIdOrderByCreatedDateAsc(user.getId(), chapterId, pageable);
+        return aiChatHistories.map(aiChatHistoryMapper::toChatHistoryResponse);
+    }
+    @Transactional
+    @Override
+    public void deleteChatHistory(Authentication authentication, int chapterId) {
+        User user = userRepository.findByUsername(authentication.getName());
+        if(user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        aiChatHistoryRepository.deleteByUserIdAndChapterId(user.getId(), chapterId);
+    }
 
+    @Override
     @Transactional
     public ChatResponse chatWithBook(Authentication authentication, int bookId, ChatRequest request) {
         User user = getCurrentUser(authentication);
@@ -85,11 +120,9 @@ public class ChatServiceImpl {
         if (book == null) throw new AppException(ErrorCode.BOOK_NOT_FOUND);
 
         List<ChatTurn> history = getRecentHistory(user.getId(), null, bookId);
-        // Lọc tất cả chunks thuộc bookId này (xuyên suốt các chương)
+        // Lọc tất cả chunks thuộc bookId
         String filterExpression = "bookId == " + bookId;
-
         String answer = askWithRag(request.getQuestion(), history, filterExpression);
-
         AIChatHistory historyEntity = AIChatHistory.builder()
                 .question(request.getQuestion())
                 .answer(answer)
@@ -99,11 +132,10 @@ public class ChatServiceImpl {
                 .book(book)
                 .build();
         aiChatHistoryRepository.save(historyEntity);
-
         return ChatResponse.builder().question(request.getQuestion()).answer(answer).build();
     }
-
-    // ================== LỊCH SỬ CHAT CẤP SÁCH ==================
+    //LỊCH SỬ CHAT CẤP SÁCH
+    @Override
     public Page<AIChatHistoryResponse> getBookChatHistory(Authentication authentication, int bookId, Pageable pageable) {
         User user = getCurrentUser(authentication);
         Page<AIChatHistory> aiChatHistories = aiChatHistoryRepository
@@ -111,17 +143,17 @@ public class ChatServiceImpl {
         return aiChatHistories.map(aiChatHistoryMapper::toChatHistoryResponse);
     }
 
+    @Override
     @Transactional
     public void deleteBookChatHistory(Authentication authentication, int bookId) {
         User user = getCurrentUser(authentication);
         aiChatHistoryRepository.deleteByUserIdAndBookIdAndChapterIsNull(user.getId(), bookId);
     }
-
-    // ================== HÀM LÕI RAG CHUNG ==================
+    //HÀM LÕI RAG CHUNG
     private String askWithRag(String question, List<ChatTurn> history, String filterExpression) {
         QuestionAnswerAdvisor qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
                 .searchRequest(SearchRequest.builder()
-                        .topK(5)
+                        .topK(5) //top 5 chunk liên quan nhất
                         .similarityThreshold(0.5)
                         .filterExpression(filterExpression)
                         .build())
@@ -132,7 +164,7 @@ public class ChatServiceImpl {
         String answer = chatClient.prompt()
                 .system(systemPrompt)
                 .user(question)
-                .advisors(qaAdvisor)
+                .advisors(qaAdvisor) //gắn cơ chế RAG
                 .call()
                 .content();
 
@@ -142,26 +174,9 @@ public class ChatServiceImpl {
         return answer.trim();
     }
 
-    private User getCurrentUser(Authentication authentication) {
-        User user = userRepository.findByUsername(authentication.getName());
-        if (user == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
-        return user;
-    }
-
-    private List<ChatTurn> getRecentHistory(int userId, Integer chapterId, Integer bookId) {
-        List<AIChatHistory> recentDesc = chapterId != null
-                ? aiChatHistoryRepository.findTop6ByUserIdAndChapterIdOrderByCreatedDateDesc(userId, chapterId)
-                : aiChatHistoryRepository.findTop6ByUserIdAndBookIdAndChapterIsNullOrderByCreatedDateDesc(userId, bookId);
-
-        if (recentDesc.isEmpty())
-            return Collections.emptyList();
-        return recentDesc.reversed().stream()
-                .map(h -> new ChatTurn(h.getQuestion(), h.getAnswer()))
-                .toList();
-    }
-
     private String formatHistory(List<ChatTurn> history) {
-        if (history == null || history.isEmpty()) return "(Chưa có lịch sử)";
+        if (history == null || history.isEmpty())
+            return "(Chưa có lịch sử)";
         StringBuilder sb = new StringBuilder();
         for (ChatTurn turn : history) {
             sb.append("Người dùng: ").append(turn.question()).append("\n");
@@ -169,4 +184,6 @@ public class ChatServiceImpl {
         }
         return sb.toString();
     }
+
+
 }

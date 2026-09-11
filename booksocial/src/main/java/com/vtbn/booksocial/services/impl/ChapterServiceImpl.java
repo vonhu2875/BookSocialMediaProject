@@ -108,7 +108,6 @@ public class ChapterServiceImpl implements ChapterService {
         if (chapter == null)
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         Book book = chapter.getBook();
-//        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isAuthor = book.getAuthor().getUsername().equals(username);
         if (!isAuthor)
             throw new AppException(ErrorCode.USER_FORBIDDEN);
@@ -140,47 +139,38 @@ public class ChapterServiceImpl implements ChapterService {
     public void deleteChapter(Authentication authentication, int chapterId) {
         String username = authentication.getName();
 
-        // 1. Tìm chapter
+        //Tìm chapter
         Chapter chapter = chapterRepository.findById(chapterId);
 
         if (chapter == null) {
             throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
         }
 
-        // 2. Tìm user đang đăng nhập
+        //Tìm user đang đăng nhập
         User user = userRepository.findByUsername(username);
 
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        // 3. Kiểm tra quyền
+        //Kiểm tra quyền
         boolean isAdmin = user.getRole() == UserRole.ADMIN;
 
-        boolean isAuthor =
-                chapter.getBook()
-                        .getAuthor()
-                        .getUsername()
-                        .equals(username);
-
+        boolean isAuthor = chapter.getBook().getAuthor().getUsername().equals(username);
         if (!isAdmin && !isAuthor) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-
-        // 4. Lưu thông tin file trước khi xóa chapter
+        //Lưu thông tin file trước khi xóa chapter
         String fileUrl = chapter.getFileUrl();
 
-        // 5. Xóa reference chapter khỏi Bookshelf
-        List<Bookshelf> bookshelves =
-                bookshelfRepository.findAllByLastReadChapter_Id(chapterId);
-
+        //Xóa reference chapter khỏi Bookshelf
+        List<Bookshelf> bookshelves = bookshelfRepository.findAllByLastReadChapter_Id(chapterId);
         for (Bookshelf bookshelf : bookshelves) {
             bookshelf.setLastReadChapter(null);
         }
-
         bookshelfRepository.saveAll(bookshelves);
 
-        // 6. Giảm tổng số chapter của Book
+        //Giảm tổng số chapter của Book
         Book book = chapter.getBook();
 
         if (book.getTotalChapters() > 0) {
@@ -188,18 +178,14 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
         bookRepository.save(book);
-
-        // 7. Xóa chapter
+        // Xóa chapter
         chapterIndexingService.removeChapterIndex(chapterId);
         chapterRepository.delete(chapter);
-
-        // 8. Xóa file trên Cloudinary
+        //Xóa file trên Cloudinary
         if (fileUrl != null && !fileUrl.isBlank()) {
             cloudinaryService.deleteFile(fileUrl);
         }
     }
-
-
     @Override
     @Transactional
     public ChapterSummaryResponse summaryChapter(Authentication authentication, int chapterId) {
@@ -223,53 +209,8 @@ public class ChapterServiceImpl implements ChapterService {
         if (summary == null || summary.isBlank()) {
             throw new AppException(ErrorCode.CHAPTER_SUMMARY_GENERATION_FAILED);
         }
-
         chapter.setSummary(summary);
-
         chapterRepository.save(chapter);
-
         return chapterMapper.toChapterSummaryResponse(chapter);
-    }
-
-    @Override
-    public ChatResponse chatWithChapter(Authentication authentication, int chapterId, ChatRequest chatRequest) {
-//        Chapter chapter = chapterRepository.findById(chapterId);
-//
-//        if(chapter == null)
-//            throw new AppException(ErrorCode.CHAPTER_NOT_FOUND);
-//
-//        User user = userRepository.findByUsername(authentication.getName());
-//
-//        if(user == null)
-//            throw new AppException(ErrorCode.USER_NOT_FOUND);
-//
-//        String content = chapter.getContent();
-//        if(content == null || content.isBlank())
-//            throw new AppException(ErrorCode.CHAPTER_CONTENT_EMPTY);
-//        String question = chatRequest.getQuestion().trim();
-//        String answer = aiService.chatWithChapter(content, question);
-//
-//        AIChatHistory aiChatHistory = AIChatHistory.builder().question(question).answer(answer).sourceReference("CHAPTER: "+ chapterId).user(user).chapter(chapter).book(chapter.getBook()).build();
-//        aiChatHistoryRepository.save(aiChatHistory);
-//
-//        return ChatResponse.builder().question(question).answer(answer).build();
-        return chatServiceImpl.chatWithChapter(authentication, chapterId, chatRequest);
-    }
-
-    @Override
-    public Page<AIChatHistoryResponse> getChatHistory(Authentication authentication, int chapterId, Pageable pageable) {
-        User user = userRepository.findByUsername(authentication.getName());
-        if(user == null)
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        Page<AIChatHistory> aiChatHistories = aiChatHistoryRepository.findByUserIdAndChapterIdOrderByCreatedDateAsc(user.getId(), chapterId, pageable);
-        return aiChatHistories.map(aiChatHistoryMapper::toChatHistoryResponse);
-    }
-    @Transactional
-    @Override
-    public void deleteChatHistory(Authentication authentication, int chapterId) {
-        User user = userRepository.findByUsername(authentication.getName());
-        if(user == null)
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        aiChatHistoryRepository.deleteByUserIdAndChapterId(user.getId(), chapterId);
     }
 }

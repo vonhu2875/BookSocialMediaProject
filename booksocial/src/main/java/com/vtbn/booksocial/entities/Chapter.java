@@ -29,13 +29,12 @@ public class Chapter extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
-
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Comment> comments;
 
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY,  cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<AIChatHistory> aiChatHistories;
 
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Quiz> quizzes;
 }

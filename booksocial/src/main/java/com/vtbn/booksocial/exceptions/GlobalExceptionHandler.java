@@ -23,22 +23,21 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(errorCode.getStatusCode()).body(response);
     }
-
+    //handler xử lý lỗi khi dữ liệu client gửi lên không đúng ràng buộc validate đã khai báo trên DTO
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidationException(
-            MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .findFirst()
                 .orElse("Validation failed");
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
-                .code(1009)
+                .code(ErrorCode.VALIDATION_FAILED.getCode())
                 .message(message)
                 .build();
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(ErrorCode.VALIDATION_FAILED.getStatusCode()).body(response);
     }
-
+    //exception có sẵn của Spring Security, ném ra khi sai mật khẩu lúc đăng nhập do DaoAuthenticationProvider ném ra
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials() {
         ErrorCode errorCode = ErrorCode.INVALID_PASSWORD;
@@ -88,7 +87,7 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(errorCode.getStatusCode()).body(response);
     }
-
+    //Spring Data / tầng persistence (JDBC/Hibernate), ném ra khi thao tác ghi xuống DB vi phạm 1 ràng buộc toàn vẹn dữ liệu
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation() {
         ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;

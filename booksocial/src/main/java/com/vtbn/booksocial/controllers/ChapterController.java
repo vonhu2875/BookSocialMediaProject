@@ -5,6 +5,7 @@ import com.vtbn.booksocial.dto.request.ChatRequest;
 import com.vtbn.booksocial.dto.request.CommentRequest;
 import com.vtbn.booksocial.dto.response.*;
 import com.vtbn.booksocial.services.ChapterService;
+import com.vtbn.booksocial.services.ChatService;
 import com.vtbn.booksocial.services.CommentService;
 import com.vtbn.booksocial.services.QuizService;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ public class ChapterController {
     private final ChapterService chapterService;
     private final CommentService commentService;
     private final QuizService quizService;
+    private final ChatService chatService;
     @GetMapping("/{chapterId}")
     public ApiResponse<ChapterDetailResponse> getChapter(@PathVariable int chapterId) {
         ChapterDetailResponse chapter = chapterService.getChapter(chapterId);
@@ -80,19 +82,19 @@ public class ChapterController {
     //CHATBOT
     @PostMapping("/{chapterId}/chat")
     public ApiResponse<ChatResponse> chatWithChapter(Authentication authentication,@PathVariable int chapterId,@Valid @RequestBody ChatRequest chatRequest) {
-        ChatResponse response = chapterService.chatWithChapter(authentication,chapterId,chatRequest);
+        ChatResponse response = chatService.chatWithChapter(authentication,chapterId,chatRequest);
         return ApiResponse.<ChatResponse>builder().result(response).build();
     }
 
     @GetMapping("/{chapterId}/chat/history")
     public ApiResponse<Page<AIChatHistoryResponse>> getAIChatHistory(Authentication authentication, @PathVariable int chapterId, Pageable pageable) {
-        Page<AIChatHistoryResponse> aiChatHistoryResponses = chapterService.getChatHistory(authentication, chapterId, pageable);
+        Page<AIChatHistoryResponse> aiChatHistoryResponses = chatService.getChatHistory(authentication, chapterId, pageable);
         return ApiResponse.<Page<AIChatHistoryResponse>>builder().result(aiChatHistoryResponses).build();
     }
 
     @DeleteMapping("/{chapterId}/chat/history")
     public ApiResponse<Void> deleteAIChatHistory(Authentication authentication, @PathVariable int chapterId) {
-        chapterService.deleteChatHistory(authentication, chapterId);
+        chatService.deleteChatHistory(authentication, chapterId);
         return ApiResponse.<Void>builder().message("delete ai chat history success").build();
     }
 

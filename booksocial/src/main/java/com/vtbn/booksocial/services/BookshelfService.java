@@ -11,4 +11,6 @@ public interface BookshelfService {
     void deleteBookshelf(Authentication authentication, int bookId);
     List<BookshelfResponse> getMyBookshelf(Authentication authentication);
     void updateReadingProgress(Authentication authentication, int bookId, ReadingProgressRequest request);
+    void addBookFavorite(Authentication authentication, int bookId);
+    List<BookshelfResponse> getMyFavoriteBookshelf(Authentication authentication);
 }

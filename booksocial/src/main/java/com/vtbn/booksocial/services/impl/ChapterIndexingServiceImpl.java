@@ -20,13 +20,9 @@ import java.util.Map;
 public class ChapterIndexingServiceImpl implements ChapterIndexingService {
     private final VectorStore vectorStore;
     // Tự động cắt văn bản thành các chunk nhỏ vừa vặn với context window
-    // Sửa dòng bị lỗi thành:
     //800 (chunkSize): Kích thước tối đa mỗi đoạn chunk (tính theo số Token).
-    //
     //350 (minChunkSizeChars): Độ dài tối thiểu tính theo ký tự để không bị cắt vụn văn bản.
-    //
     //5 (minChunkLengthToEmbed): Số lượng từ tối thiểu của chunk để tiến hành tạo Vector Embedding.
-    //
     //1000 (maxNumChunks): Số lượng chunk tối đa tạo ra từ 1 tài liệu.
     private final TokenTextSplitter splitter = TokenTextSplitter.builder()
             .withChunkSize(800)

@@ -18,9 +18,9 @@ import com.vtbn.booksocial.exceptions.ErrorCode;
 import com.vtbn.booksocial.mappers.UserMapper;
 import com.vtbn.booksocial.repositories.InvalidatedTokenRepository;
 import com.vtbn.booksocial.repositories.UserRepository;
+import com.vtbn.booksocial.security.CustomUserDetailService;
 import com.vtbn.booksocial.security.JwtService;
 import com.vtbn.booksocial.services.AuthService;
-import com.vtbn.booksocial.services.UserService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-//      //lấy ra principal, tức là đối tượng đại diện cho user đã được xác thực.
+//      //lấy ra principal, đối tượng đại diện cho user đã được xác thực.
         UserDetails userDetails = (UserDetails)authentication.getPrincipal();
         if(userDetails == null)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -95,29 +95,25 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse googleLogin(GoogleLoginRequest request) {
         try {
-            // 1. Khởi tạo Google Verifier với Client ID
             //Kiểm tra Google ID Token mà Frontend gửi lên có hợp lệ hay không.
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                    new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(googleClientId))
-                    .build();
-
-            // 2. Kiểm tra tính hợp lệ của Token gửi từ Frontend
+            //GoogleIdTokenVerifier: Class của thư viện Google API Client, chuyên dùng để xác minh chữ ký + tính hợp lệ của một ID Token do Google phát hành.
+            //verifier gọi ra internet tới Google, lấy public key về, đọc hiểu response JSON đó.
+            //Quan trọng nhất về bảo mật. Chỉ định rằng token hợp lệ chỉ khi claim "aud" (audience) bên trong nó khớp đúng với googleClientId — chính là OAuth Client ID bạn đã đăng ký cho ứng dụng BookSocial trên Google Cloud Console.
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).setAudience(Collections.singletonList(googleClientId)).build();
+            //Kiểm tra tính hợp lệ của Token gửi từ Frontend
             GoogleIdToken idToken = verifier.verify(request.getIdToken());
             if (idToken == null) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
-
-            // 3. Trích xuất thông tin User từ Google Payload
+            //Trích xuất thông tin user từ google payload
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String firstName = (String) payload.get("given_name");
             String lastName = (String) payload.get("family_name");
             String pictureUrl = (String) payload.get("picture");
 
-            // 4. Tìm kiếm User theo Email trong Database
             User user = userRepository.findByEmail(email);
-            // 5. Nếu chưa có -> Tạo tài khoản mới (Auto-register)
+            //tạo tài khoản mới nếu chưa có
             if (user == null) {
                 String baseUsername = email.split("@")[0];
                 String username = baseUsername;
@@ -141,15 +137,10 @@ public class AuthServiceImpl implements AuthService {
             }
             if(!user.isActive())
                 throw new AppException(ErrorCode.USER_FORBIDDEN);
-            // 6. Tạo UserDetails chuẩn từ CustomUserDetailService của dự án
             UserDetails userDetails = customUserDetailService.loadUserByUsername(user.getUsername());
-            // 7. Sinh JWT Token bằng JwtService của dự án
             String token = jwtService.generateToken(userDetails);
-
-            // 8. Map thông tin User sang UserResponse
             UserResponse userResponse = userMapper.toResponse(user);
 
-            // 9. Trả về LoginResponse
             return LoginResponse.builder().token(token).tokenType("Bearer").user(userResponse).build();
         } catch (AppException e) {
             throw e;

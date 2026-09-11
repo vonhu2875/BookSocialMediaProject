@@ -21,4 +21,5 @@ public interface BookService {
     void approveBook(int id);
     void rejectBook(int id);
     void increaseViewCount(int id);
+
 }

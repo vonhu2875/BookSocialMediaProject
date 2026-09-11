@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 public interface UserService {
     UserResponse getInfoUser(String username);
     UserResponse updateInfoUser(String username, UpdateProfileRequest request);
-
     void changePassword(String username, ChangePasswordRequest request);
     Page<UserResponse> getAllUser(Pageable pageable);
     void changeStatusUser(Authentication authentication, int userId);

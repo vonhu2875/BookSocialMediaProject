@@ -8,14 +8,12 @@ import com.vtbn.booksocial.services.AIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.converter.BeanOutputConverter;
-//import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class GeminiAIServiceImpl implements AIService {
     private final ChatModel chatModel;
-//    private final EmbeddingModel embeddingModel;
     @Override
     public String summaryChapter(String content) {
         String prompt = """

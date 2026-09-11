@@ -1,7 +1,7 @@
 package com.vtbn.booksocial.configs;
 
 import com.vtbn.booksocial.security.JwtAuthenticationFilter;
-import com.vtbn.booksocial.services.impl.CustomUserDetailService;
+import com.vtbn.booksocial.security.CustomUserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,70 +50,46 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // Tắt CSRF
-                .csrf(AbstractHttpConfigurer::disable)
-
-                // Tắt Form Login mặc định của Spring Security
-                .formLogin(AbstractHttpConfigurer::disable)
-
-                // Tắt HTTP Basic Authentication
-                .httpBasic(AbstractHttpConfigurer::disable)
-
-                // Khai báo AuthenticationProvider
-                .authenticationProvider(authenticationProvider())
-
-                // Không sử dụng Session
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // Phân quyền API
-                .authorizeHttpRequests(auth -> auth
-
-                        // Cho phép tất cả request OPTIONS (phục vụ CORS)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Cho phép truy cập các API Authentication
-                        .requestMatchers(
-                                "/error",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/auth/**",
-                                "/oauth2/**",
-                                "/login/oauth2/**"
-                                ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users", "/books/pending", "/books/rejecting").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/categories/{id}", "/books/{id}/approve", "/books/{id}/reject", "/{userId}/change-status").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**", "/categories/{id}", "/quizzes/{quizId}").hasRole("ADMIN")
-                        // Các API còn lại phải đăng nhập
-                        .anyRequest().authenticated()
-                )
-                // Thêm JWT Filter vào trước Filter mặc định của Spring Security
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(AbstractHttpConfigurer::disable)
+        // Tắt Form Login mặc định của Spring Security
+        .formLogin(AbstractHttpConfigurer::disable)
+        // Tắt HTTP Basic Authentication
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .authenticationProvider(authenticationProvider())
+        // Không sử dụng Session
+        .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        // Phân quyền API
+        .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(
+                        "/error",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/auth/**",
+                        "/oauth2/**",
+                        "/login/oauth2/**"
+                        ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/users", "/books/pending", "/books/rejecting").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/categories").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/categories/{id}", "/books/{id}/approve", "/books/{id}/reject", "/{userId}/change-status").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/users/**", "/categories/{id}", "/quizzes/{quizId}").hasRole("ADMIN")
+                .anyRequest().authenticated()
+        )
+        // Thêm JWT Filter vào trước Filter mặc định của Spring Security
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // Thay bằng domain/port chính xác của Frontend
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-
-        // Cho phép các HTTP Method
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Cho phép các Header (Authorization, Content-Type, v.v.)
         configuration.setAllowedHeaders(List.of("*"));
-
-        // Cho phép gửi kèm cookie/credentials nếu cần
-        configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

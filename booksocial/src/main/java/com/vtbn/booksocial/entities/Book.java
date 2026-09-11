@@ -34,25 +34,20 @@ public class Book extends BaseEntity{
     private BookStatus status;
     private Instant approvedAt;
 
-//    orphan xóa luôn cả chapters dưới db nếu xóa
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Chapter> chapters;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @OneToMany(mappedBy = "book",fetch = FetchType.LAZY, cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "book",fetch = FetchType.LAZY, cascade = CascadeType.REMOVE,orphanRemoval = true)
     private Set<Bookshelf> bookShelfs;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Rating> ratings;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "book_cate",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "cate_id"))
+    @JoinTable(name = "book_cate", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "cate_id"))
     private Set<Category> categories;
 }

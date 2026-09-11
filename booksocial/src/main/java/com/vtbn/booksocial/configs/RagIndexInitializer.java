@@ -13,11 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-//Những chương sách đã có sẵn trong CSDL PostgreSQL từ trước sẽ chưa có Vector Embedding. Component này sẽ chạy 1 lần duy nhất khi khởi động ứng dụng để quét và index toàn bộ dữ liệu cũ.
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
-
 public class RagIndexInitializer {
     private final ChapterRepository chapterRepository;
     private final ChapterIndexingService chapterIndexingService;

@@ -72,7 +72,6 @@ public class UserController {
     public ApiResponse<List<BookshelfResponse>> getMyBookshelf(
             Authentication authentication
     ) {
-
         List<BookshelfResponse> response =
                 bookshelfService.getMyBookshelf(authentication);
 
@@ -80,7 +79,12 @@ public class UserController {
                 .result(response)
                 .build();
     }
-
+    //lấy danh sách những sách yêu thích
+    @GetMapping("/bookshelfs/favorite")
+    public ApiResponse<List<BookshelfResponse>> getMyFavoriteBook(Authentication authentication) {
+        List<BookshelfResponse> bookshelfResponses = bookshelfService.getMyFavoriteBookshelf(authentication);
+        return ApiResponse.<List<BookshelfResponse>>builder().result(bookshelfResponses).build();
+    }
     //Attempt quiz
     @GetMapping("/my-attempts")
     public ApiResponse<Page<QuizAttemptResponse>> getMyAttempts(
@@ -93,4 +97,6 @@ public class UserController {
                 .result(response)
                 .build();
     }
+
+
 }

@@ -4,14 +4,18 @@ import com.vtbn.booksocial.dto.request.BookRequest;
 import com.vtbn.booksocial.dto.response.BookDetailResponse;
 import com.vtbn.booksocial.dto.response.BookListResponse;
 import com.vtbn.booksocial.entities.Book;
+import com.vtbn.booksocial.entities.Bookshelf;
 import com.vtbn.booksocial.entities.Category;
 import com.vtbn.booksocial.entities.User;
 import com.vtbn.booksocial.enums.BookStatus;
+import com.vtbn.booksocial.enums.BookshelfStatus;
 import com.vtbn.booksocial.enums.UserRole;
 import com.vtbn.booksocial.exceptions.AppException;
 import com.vtbn.booksocial.exceptions.ErrorCode;
 import com.vtbn.booksocial.mappers.BookMapper;
+import com.vtbn.booksocial.mappers.BookshelfMapper;
 import com.vtbn.booksocial.repositories.BookRepository;
+import com.vtbn.booksocial.repositories.BookshelfRepository;
 import com.vtbn.booksocial.repositories.CategoryRepository;
 import com.vtbn.booksocial.repositories.UserRepository;
 import com.vtbn.booksocial.services.BookService;
@@ -42,6 +46,8 @@ public class BookServiceImpl implements BookService {
     private final CategoryRepository categoryRepository;
     private final CloudinaryService cloudinaryService;
     private final BookRepository bookRepository;
+    private final BookshelfRepository bookshelfRepository;
+    private final BookshelfMapper bookshelfMapper;
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg", "image/png", "image/webp", "image/gif"
     );
@@ -97,7 +103,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookListResponse> getBooks(List<Integer> categoryIds, int authorId, String keyword, Pageable pageable) {
-        Specification<Book> specification =Specification
+        Specification<Book> specification = Specification
                         .where(BookSpecification.hasStatus(BookStatus.APPROVED))
                         .and(BookSpecification.hasCategories(categoryIds))
                         .and(BookSpecification.hasAuthor(authorId))
@@ -219,5 +225,6 @@ public class BookServiceImpl implements BookService {
         book.setViewCount(book.getViewCount() + 1);
         bookRepository.save(book);
     }
+
 
 }
