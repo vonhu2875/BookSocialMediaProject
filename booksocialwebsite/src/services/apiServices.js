@@ -11,6 +11,7 @@ export const authService = {
   getMyAttempts: (page = 0, size = 6) => api.get(`/users/my-attempts?page=${page}&size=${size}`),
   changePassword: (data) => api.put('/users/change-password', data),
   getMyBookshelf: () => api.get('/users/bookshelfs'),
+  getMyBookshelfFavorite: () => api.get('/users/bookshelfs/favorite'),
   getMyBooks: (page = 0, size = 10) => api.get(`/users/books?page=${page}&size=${size}`),
 
   //admin user
@@ -55,6 +56,8 @@ export const bookService = {
   getRatings: (bookId) => api.get(`/books/${bookId}/ratings`),
   getRatingMyself: (bookId) => api.get(`/books/${bookId}/ratings/myself`),
   addRating: (bookId, data) => api.post(`/books/${bookId}/ratings`, data),
+  updateBookshelfFavorite: (bookId) => api.put(`/books/${bookId}/bookshelfs/favorite`),
+  
   //rating controller
   updateRating: (ratingId, data) => api.put(`/ratings/${ratingId}`, data),
   deleteRating: (ratingId) => api.delete(`/ratings/${ratingId}`),

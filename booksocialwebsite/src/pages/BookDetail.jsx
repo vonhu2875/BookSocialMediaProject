@@ -17,6 +17,7 @@ import {
   Share2,
   Check,
   Play,
+  Heart,
 } from 'lucide-react';
 
 export default function BookDetail() {
@@ -27,6 +28,8 @@ export default function BookDetail() {
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [updatingFavorite, setUpdatingFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState('chapters');
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
@@ -49,12 +52,14 @@ export default function BookDetail() {
         setChapters(chapData);
 
         try {
-          const shelfRes = await authService.getMyBookshelf();
-          const shelfData = shelfRes;
-          if (Array.isArray(shelfData)) {
-            const found = shelfData.some((item) => item.bookId === Number(id) || item.id === Number(id));
-            setIsSaved(found);
-          }
+          const [shelfRes, favoriteRes] = await Promise.all([
+            authService.getMyBookshelf(),
+            authService.getMyBookshelfFavorite().catch(() => []),
+          ]);
+          const shelfData = Array.isArray(shelfRes) ? shelfRes : shelfRes?.content || [];
+          const favoriteData = Array.isArray(favoriteRes) ? favoriteRes : favoriteRes?.content || [];
+          setIsSaved(shelfData.some((item) => item.bookId === Number(id) || item.id === Number(id)));
+          setIsFavorite(favoriteData.some((item) => item.bookId === Number(id) || item.id === Number(id)));
         } catch {
           // Bỏ qua nếu chưa đăng nhập
         }
@@ -82,6 +87,18 @@ export default function BookDetail() {
       console.error('Lỗi thao tác tủ sách:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    setUpdatingFavorite(true);
+    try {
+      await bookService.updateBookshelfFavorite(id);
+      setIsFavorite((previous) => !previous);
+    } catch (error) {
+      console.error('Lỗi cập nhật sách yêu thích:', error);
+    } finally {
+      setUpdatingFavorite(false);
     }
   };
 
@@ -238,6 +255,25 @@ export default function BookDetail() {
                   <Bookmark className="w-4 h-4" />
                   <span>Thêm vào Tủ sách</span>
                 </>
+              )}
+            </button>
+
+            {/* Nút Lưu sách yêu thích */}
+            <button
+              onClick={handleToggleFavorite}
+              disabled={updatingFavorite}
+              title={isFavorite ? 'Bỏ lưu sách yêu thích' : 'Lưu sách yêu thích'}
+              aria-label={isFavorite ? 'Bỏ lưu sách yêu thích' : 'Lưu sách yêu thích'}
+              className={`p-3 rounded-xl border transition duration-300 ${
+                isFavorite
+                  ? 'bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25'
+                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-rose-400'
+              }`}
+            >
+              {updatingFavorite ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
               )}
             </button>
 

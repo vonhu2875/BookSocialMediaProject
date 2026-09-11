@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { categoryService } from '../services/apiServices';
 import { Sparkles, Layers } from 'lucide-react';
 
-export default function CategoryBar({ selectedCategoryId, onSelectCategory }) {
+export default function CategoryBar({ selectedCategoryIds, onToggleCategory, onClearCategories }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,9 +34,9 @@ export default function CategoryBar({ selectedCategoryId, onSelectCategory }) {
     <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none no-scrollbar">
       {/* Nút Chọn Tất Cả */}
       <button
-        onClick={() => onSelectCategory(null)}
+        onClick={onClearCategories}
         className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shrink-0 flex items-center gap-2 ${
-          selectedCategoryId === null
+          selectedCategoryIds.length === 0
             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
             : 'bg-slate-800/80 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700/50'
         }`}
@@ -47,11 +47,11 @@ export default function CategoryBar({ selectedCategoryId, onSelectCategory }) {
 
       {/* Danh Sách Thể Loại Trả Về Từ Backend */}
       {categories.map((cat) => {
-        const isSelected = selectedCategoryId === cat.id;
+        const isSelected = selectedCategoryIds.includes(cat.id);
         return (
           <button
             key={cat.id}
-            onClick={() => onSelectCategory(cat.id)}
+            onClick={() => onToggleCategory(cat.id)}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shrink-0 flex items-center gap-2 ${
               isSelected
                 ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'

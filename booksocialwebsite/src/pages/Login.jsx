@@ -24,14 +24,7 @@ export default function Login() {
       login(data);
       navigate('/');
     } catch (err) {
-      if(err.code === 403)
-      {
-        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
-      }
-      else
-      {
-        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!');
-      }
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!');
     } finally {
       setLoading(false);
     }
@@ -42,17 +35,11 @@ export default function Login() {
       setLoading(true);
       setError('');
 
-      // credentialResponse.credential chính là idToken từ Google
+      // credentialResponse.credential là idToken từ Google
       const data = await authService.googleLogin(credentialResponse.credential);
-      
-      // Lấy kết quả từ ApiResponse<LoginResponse> của Backend
       login(data);
-      navigate('/'); // Chuyển hướng sang trang chủ
+      navigate('/');
     }catch (err) {
-      if(err.code === 403) { 
-        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
-      }
-      else
         setError(err.message || 'Đăng nhập bằng Google thất bại!');
     } finally {
       setLoading(false);

@@ -30,7 +30,7 @@ export default function UploadBook() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Hàm hỗ trợ cuộn mượt tới khung báo lỗi (dùng setTimeout để chờ DOM render)
+  
   const scrollToError = () => {
     setTimeout(() => {
       errorRef.current?.scrollIntoView({ 
@@ -41,7 +41,7 @@ export default function UploadBook() {
     }, 50);
   };
 
-  // 1. Tải danh sách Thể loại (GET /categories)
+  //Tải danh sách Thể loại (GET /categories)
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -61,7 +61,7 @@ export default function UploadBook() {
     fetchCategories();
   }, []);
 
-  // 2. Xử lý Chọn/Bỏ chọn Thể loại
+  //Xử lý Chọn/Bỏ chọn Thể loại
   const handleCategoryToggle = (categoryId) => {
     if (selectedCategoryIds.includes(categoryId)) {
       setSelectedCategoryIds(selectedCategoryIds.filter(id => id !== categoryId));
@@ -70,13 +70,14 @@ export default function UploadBook() {
     }
   };
 
-  // 3. Xử lý Chọn File Ảnh
+  //Xử lý Chọn File Ảnh
   const handleImageChange = (e) => {
     try {
       const file = e.target.files[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
-          alert('Dung lượng ảnh tối đa là 5MB');
+          setError('Dung lượng ảnh tối đa là 5MB');
+          scrollToError();
           return;
         }
         setCoverImage(file);
@@ -93,7 +94,7 @@ export default function UploadBook() {
     setImagePreview(null);
   };
 
-  // 4. Submit Form (POST /books - FormData)
+  //Submit Form
   const handleSubmit = async (e) => {
     e.preventDefault();
 

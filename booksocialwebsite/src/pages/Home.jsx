@@ -14,7 +14,7 @@ export default function Home() {
 
   // State quản lý danh sách sách và phân trang
   const [books, setBooks] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -26,10 +26,10 @@ export default function Home() {
       try {
         const params = {
           page: page,
-          size: 2,
+          size: 10,
           keyword: keywordParam || undefined,
           authorId: authorIdParam || undefined,
-          categoryIds: selectedCategoryId ? [selectedCategoryId] : undefined,
+          categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
         };
 
         // Backend trả về Page<BookListResponse>
@@ -44,12 +44,21 @@ export default function Home() {
     };
 
     fetchBooks();
-  }, [selectedCategoryId, page, keywordParam, authorIdParam]);
+  }, [selectedCategoryIds, page, keywordParam, authorIdParam]);
 
-  // Xử lý khi bấm chuyển Thể Loại
-  const handleSelectCategory = (categoryId) => {
-    setSelectedCategoryId(categoryId);
+  // Xử lý khi chọn hoặc bỏ chọn một hoặc nhiều thể loại
+  const handleToggleCategory = (categoryId) => {
+    setSelectedCategoryIds((currentIds) => (
+      currentIds.includes(categoryId)
+        ? currentIds.filter((id) => id !== categoryId)
+        : [...currentIds, categoryId]
+    ));
     setPage(0); // Reset về trang đầu tiên
+  };
+
+  const handleClearCategories = () => {
+    setSelectedCategoryIds([]);
+    setPage(0);
   };
 
   return (
@@ -78,8 +87,9 @@ export default function Home() {
       <div className="space-y-3">
         <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Danh mục thể loại</h2>
         <CategoryBar
-          selectedCategoryId={selectedCategoryId}
-          onSelectCategory={handleSelectCategory}
+          selectedCategoryIds={selectedCategoryIds}
+          onToggleCategory={handleToggleCategory}
+          onClearCategories={handleClearCategories}
         />
       </div>
 

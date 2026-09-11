@@ -11,15 +11,28 @@ import {
   Search, 
   ArrowRight,
   BookMarked,
-  Loader2
+  Loader2,
+  Heart,
+  HeartOff,
 } from 'lucide-react';
+
+const getListFromResponse = (response) => {
+  if (Array.isArray(response)) return response;
+  return response?.content || response?.items || [];
+};
+
+const getBookId = (item) => item.bookId || item.book?.id || item.id;
+const getBookTitle = (item) => item.title || item.book?.title || 'Sách không tên';
+const getBookCover = (item) => item.coverImage || item.book?.coverImage;
+const getBookAuthor = (item) => item.authorName || item.authorUsername || item.book?.authorUsername;
 
 export default function Bookshelfs() {
   const navigate = useNavigate();
   const [bookshelfItems, setBookshelfItems] = useState([]);
+  const [favoriteItems, setFavoriteItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'READING' | 'COMPLETED'
+  const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'READING' | 'COMPLETED' | 'FAVORITES'
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Gọi API Lấy Danh Sách Tủ Sách Thực Tế: GET /users/bookshelfs
@@ -29,10 +42,13 @@ export default function Bookshelfs() {
         setLoading(true);
         setError(null);
         
-        const response = await authService.getMyBookshelf();
-        
-        const data = response;
-        setBookshelfItems(data);
+        const [bookshelfResponse, favoriteResponse] = await Promise.all([
+          authService.getMyBookshelf(),
+          authService.getMyBookshelfFavorite().catch(() => []),
+        ]);
+
+        setBookshelfItems(getListFromResponse(bookshelfResponse));
+        setFavoriteItems(getListFromResponse(favoriteResponse));
       } catch (err) {
         console.error('Lỗi khi tải tủ sách:', err);
         setError('Không thể tải danh sách tủ sách. Vui lòng thử lại sau.');
@@ -61,6 +77,19 @@ export default function Bookshelfs() {
     }
   };
 
+  const handleToggleFavorite = async (bookId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await bookService.updateBookshelfFavorite(bookId);
+      setFavoriteItems((prev) => prev.filter((item) => getBookId(item) !== bookId));
+    } catch (err) {
+      console.error('Lỗi cập nhật sách yêu thích:', err);
+      alert('Cập nhật sách yêu thích thất bại!');
+    }
+  };
+
   // Lọc danh sách theo từ khóa & trạng thái
   const filteredBooks = bookshelfItems.filter(item => {
     const title = item.title || '';
@@ -75,6 +104,10 @@ export default function Bookshelfs() {
 
     return matchStatus && matchQuery;
   });
+
+  const filteredFavoriteItems = favoriteItems.filter((item) =>
+    getBookTitle(item).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Thống kê
   const totalBooks = bookshelfItems.length;
@@ -125,7 +158,7 @@ export default function Bookshelfs() {
         )}
 
         {/* Thống Kê Nhanh */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
               <BookOpen className="w-6 h-6" />
@@ -153,6 +186,16 @@ export default function Bookshelfs() {
             <div>
               <p className="text-xs font-medium text-slate-400">Đã Hoàn Thành</p>
               <p className="text-2xl font-bold text-white">{completedCount}</p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <Heart className="w-6 h-6 fill-rose-400/20" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-slate-400">Đã Thích</p>
+              <p className="text-2xl font-bold text-white">{favoriteItems.length}</p>
             </div>
           </div>
         </div>
@@ -189,10 +232,106 @@ export default function Bookshelfs() {
           >
             Đã xong ({completedCount})
           </button>
+          <button
+            onClick={() => setFilterStatus('FAVORITES')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 ${
+              filterStatus === 'FAVORITES'
+                ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+            }`}
+          >
+            <Heart className="w-4 h-4" />
+            Đã thích ({favoriteItems.length})
+          </button>
         </div>
 
         {/* Grid Danh Sách Sách */}
-        {filteredBooks.length > 0 ? (
+        {filterStatus === 'FAVORITES' ? (
+          filteredFavoriteItems.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredFavoriteItems.map((item) => {
+                const bookId = getBookId(item);
+                const title = getBookTitle(item);
+                const authorName = getBookAuthor(item);
+                const coverUrl = getBookCover(item);
+                const lastChapterId = item.lastReadChapterId;
+                const isCompleted = item.status === 'COMPLETED' || item.completed === true;
+
+                return (
+                  <div
+                    key={bookId}
+                    className="group relative bg-slate-900 border border-slate-800/80 hover:border-rose-500/50 rounded-2xl p-4 flex gap-4 transition duration-300 shadow-lg"
+                  >
+                    <Link to={`/books/${bookId}`} className="shrink-0 overflow-hidden rounded-xl">
+                      {coverUrl ? (
+                        <img src={coverUrl} alt={title} className="w-24 h-36 object-cover rounded-xl group-hover:scale-105 transition duration-300" />
+                      ) : (
+                        <div className="w-24 h-36 flex items-center justify-center text-slate-600 bg-slate-950 rounded-xl">
+                          <BookOpen className="w-10 h-10" />
+                        </div>
+                      )}
+                    </Link>
+
+                    <div className="flex-1 flex flex-col justify-between min-w-0">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <Link to={`/books/${bookId}`}>
+                            <h3 className="font-bold text-slate-100 hover:text-rose-300 transition line-clamp-1 text-base">{title}</h3>
+                          </Link>
+                          <button
+                            onClick={(e) => handleToggleFavorite(bookId, e)}
+                            title="Bỏ lưu sách yêu thích"
+                            className="text-rose-400 hover:text-rose-300 p-1 rounded-lg hover:bg-rose-500/10 transition"
+                          >
+                            <HeartOff className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {authorName && (
+                          <p className="text-xs text-slate-400 mt-1 line-clamp-1">
+                            Tác giả: <span className="text-slate-300">{authorName}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 my-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-slate-400">Tiến độ:</span>
+                          <span className={`font-bold ${isCompleted ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {isCompleted ? 'Đã hoàn thành' : 'Đang đọc'}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                          <div
+                            className={`${isCompleted ? 'bg-emerald-500' : 'bg-amber-500'} h-2 rounded-full transition-all duration-500`}
+                            style={{ width: isCompleted ? '100%' : '0%' }}
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (lastChapterId) {
+                            navigate(`/chapters/${lastChapterId}`);
+                          } else {
+                            navigate(`/books/${bookId}`);
+                          }
+                        }}
+                        className="w-full mt-1 px-3 py-2 bg-rose-600/10 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 hover:border-transparent rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition duration-200"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        <span>{isCompleted ? 'Đọc lại' : 'Đọc tiếp'}</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-16 text-center bg-slate-900/40 border border-slate-800/60 rounded-3xl text-sm text-slate-400">
+              Chưa có sách yêu thích. Hãy nhấn biểu tượng trái tim ở trang chi tiết sách.
+            </div>
+          )
+        ) : filteredBooks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBooks.map((item) => {
               const bookId = item.bookId;

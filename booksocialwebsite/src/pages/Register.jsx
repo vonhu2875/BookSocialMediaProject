@@ -17,7 +17,6 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    //Không cho trình duyệt submit và reload trang theo cách mặc định
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -27,12 +26,7 @@ export default function Register() {
       alert('Tạo tài khoản thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (err) {
-      if(err.code === 403) {
-        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
-      }
-      else {
         setError(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin!');
-      }
     } finally {
       setLoading(false);
     }
