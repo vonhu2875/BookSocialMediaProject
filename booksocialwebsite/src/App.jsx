@@ -1,7 +1,9 @@
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider, Outlet, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,17 +22,30 @@ import EditChapter from './pages/EditChapter';
 import QuizHistory from './pages/profiles/QuizHistory';
 import AdminDashboard from './pages/AdminDashboard';
 
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname, search]);
+
+  return null;
+}
+
 // Layout dùng chung cho các trang yêu cầu đăng nhập
 function MainLayout() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-950 font-sans text-slate-100">
+      <ScrollToTop />
       {/* Navbar cố định phía trên */}
       <Navbar />
       
       {/* Nội dung thay đổi tùy thuộc vào Route */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-6 pt-4 sm:px-6 lg:px-8">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 }
