@@ -39,7 +39,6 @@ public class CategoryController {
     public ApiResponse<CategoryResponse> updateCategory(@PathVariable int id, @RequestBody UpdateCategoryRequest request) {
         CategoryResponse result = categoryService.updateCategory(id, request);
         return ApiResponse.<CategoryResponse>builder().message("update category success").result(result).build();
-//
     }
 
     @DeleteMapping("/{id}")

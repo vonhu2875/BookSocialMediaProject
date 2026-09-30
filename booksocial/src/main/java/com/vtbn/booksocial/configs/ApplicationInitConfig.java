@@ -40,7 +40,6 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(){
         return(args -> {
-            // ================== TÀI KHOẢN ADMIN MẶC ĐỊNH ==================
             if(userRepository.findByUsername(ADMIN_USER_NAME) == null){
                 User user = User.builder()
                         .username(ADMIN_USER_NAME)
@@ -62,10 +61,6 @@ public class ApplicationInitConfig {
 
             if (categoryRepository.count() == 0) {
                 log.info("Đang khởi tạo dữ liệu mẫu đầy đủ cho toàn bộ hệ thống...");
-
-                // ================== 1. USERS ==================
-                // 3 tác giả (author) + 3 độc giả (reader) — tất cả role READER,
-                // vì trong hệ thống, "tác giả" chỉ là user thường đã đăng sách lên (POST /books yêu cầu role READER).
                 User author1 = User.builder()
                         .username("nguyennhatanh")
                         .password(passwordEncoder.encode("123456"))
@@ -140,7 +135,6 @@ public class ApplicationInitConfig {
 
                 userRepository.saveAll(List.of(author1, author2, author3, reader1, reader2, reader3));
 
-                // ================== 2. CATEGORIES ==================
                 Category cat1 = Category.builder().name("Tiểu Thuyết").description("Các tác phẩm tiểu thuyết văn học sâu sắc").build();
                 Category cat2 = Category.builder().name("Khoa Học Viễn Tưởng").description("Truyện khai thác đề tài tương lai, vũ trụ").build();
                 Category cat3 = Category.builder().name("Trinh Thám").description("Những vụ án bí ẩn và hành trình phá án").build();
@@ -154,8 +148,6 @@ public class ApplicationInitConfig {
 
                 categoryRepository.saveAll(List.of(cat1, cat2, cat3, cat4, cat5, cat6, cat7, cat8, cat9, cat10));
 
-                // ================== 3. BOOKS ==================
-                // --- Sách 1: Khoa học viễn tưởng, đã duyệt ---
                 Book book1 = Book.builder()
                         .title("Hành Trình Vào Vũ Trụ")
                         .description("Chuyến phiêu lưu vượt qua các thiên hà của nhóm phi hành gia trẻ.")
@@ -169,7 +161,6 @@ public class ApplicationInitConfig {
                         .categories(Set.of(cat1, cat2))
                         .build();
 
-                // --- Sách 2: Trinh thám, đã duyệt ---
                 Book book2 = Book.builder()
                         .title("Bí Uẩn Đêm Mưa")
                         .description("Một vụ án mạng kỳ lạ xảy ra tại một thị trấn hẻo lánh.")
@@ -183,7 +174,6 @@ public class ApplicationInitConfig {
                         .categories(Set.of(cat1, cat3))
                         .build();
 
-                // --- Sách 3: Tình cảm tuổi trẻ, đã duyệt ---
                 Book book3 = Book.builder()
                         .title("Nắng Hạ Năm Đó")
                         .description("Ký ức đẹp đẽ về tình bạn và những ước mơ thời trung học.")
@@ -197,7 +187,6 @@ public class ApplicationInitConfig {
                         .categories(Set.of(cat1, cat5))
                         .build();
 
-                // --- Sách 4: Kỹ năng sống, tiếng Anh, ĐANG CHỜ DUYỆT (PENDING) ---
                 Book book4 = Book.builder()
                         .title("The Mindset Shift")
                         .description("A comprehensive guide to changing your daily habits and perspective.")
@@ -209,8 +198,6 @@ public class ApplicationInitConfig {
                         .author(author2)
                         .categories(Set.of(cat4))
                         .build();
-
-                // --- Sách 5: Kinh dị, đã duyệt ---
                 Book book5 = Book.builder()
                         .title("Ngôi Nhà Ma Ám")
                         .description("Gia đình nhỏ chuyển đến căn biệt thự cũ và những hiện tượng không thể lý giải bắt đầu xảy ra.")
@@ -224,7 +211,6 @@ public class ApplicationInitConfig {
                         .categories(Set.of(cat1, cat6))
                         .build();
 
-                // --- Sách 6: Lịch sử, BỊ TỪ CHỐI (REJECTED) — để test luồng admin duyệt/từ chối sách ---
                 Book book6 = Book.builder()
                         .title("Đế Chế Vàng Son")
                         .description("Góc nhìn hư cấu về một vương triều hưng thịnh rồi sụp đổ.")
@@ -237,7 +223,6 @@ public class ApplicationInitConfig {
                         .categories(Set.of(cat7))
                         .build();
 
-                // --- Sách 7: Kinh doanh, đã duyệt ---
                 Book book7 = Book.builder()
                         .title("Khởi Nghiệp Từ Con Số 0")
                         .description("Hành trình xây dựng doanh nghiệp từ hai bàn tay trắng, đầy bài học thực chiến.")
@@ -253,8 +238,6 @@ public class ApplicationInitConfig {
 
                 bookRepository.saveAll(List.of(book1, book2, book3, book4, book5, book6, book7));
 
-                // ================== 4. CHAPTERS ==================
-                // --- Sách 1: Hành Trình Vào Vũ Trụ (3 chương) ---
                 Chapter b1_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Khởi hành")
                         .content("Con tàu Hy Vọng rời bệ phóng lúc bình minh, mang theo năm phi hành gia trẻ tuổi " +
@@ -284,7 +267,6 @@ public class ApplicationInitConfig {
                                 "suốt hàng nghìn năm qua. Thuyền trưởng Lâm nhận ra: đây không phải một khám phá tình cờ.")
                         .book(book1).build();
 
-                // --- Sách 2: Bí Uẩn Đêm Mưa (3 chương) ---
                 Chapter b2_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Tiếng động lúc nửa đêm")
                         .content("Mưa tầm tã rơi trên mái tôn thị trấn Sương Mù vào cái đêm ông Tư Phát được phát hiện " +
@@ -311,7 +293,6 @@ public class ApplicationInitConfig {
                                 "Bình nhận ra thị trấn nhỏ yên bình này đang giấu trong lòng nó một bí mật lớn hơn nhiều.")
                         .book(book2).build();
 
-                // --- Sách 3: Nắng Hạ Năm Đó (2 chương) ---
                 Chapter b3_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Tiếng ve gọi hè")
                         .content("Mùa hè năm ấy thật dài, dài như những buổi chiều đạp xe cùng đám bạn dọc con đường " +
@@ -328,7 +309,6 @@ public class ApplicationInitConfig {
                                 "Nhưng liệu một lời hứa tuổi mười bảy có đủ sức chống lại thời gian và khoảng cách?")
                         .book(book3).build();
 
-                // --- Sách 4: The Mindset Shift (1 chương, tiếng Anh) ---
                 Chapter b4_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chapter 1: The First Step")
                         .content("Every meaningful change begins with a single decision: the decision to see things " +
@@ -338,7 +318,6 @@ public class ApplicationInitConfig {
                                 "occasional grand gestures of willpower.")
                         .book(book4).build();
 
-                // --- Sách 5: Ngôi Nhà Ma Ám (2 chương) ---
                 Chapter b5_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Căn biệt thự cũ")
                         .content("Gia đình chị Hạnh chuyển đến căn biệt thự cổ nằm cuối con đường vắng vào một chiều " +
@@ -356,7 +335,6 @@ public class ApplicationInitConfig {
                                 "của câu chuyện đó.")
                         .book(book5).build();
 
-                // --- Sách 6: Đế Chế Vàng Son (1 chương) ---
                 Chapter b6_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Buổi đăng quang")
                         .content("Dưới ánh đuốc rực sáng của đại điện, vị hoàng đế trẻ tuổi chính thức lên ngôi giữa " +
@@ -365,7 +343,6 @@ public class ApplicationInitConfig {
                                 "triều đại từng được xem là hùng mạnh nhất thời bấy giờ.")
                         .book(book6).build();
 
-                // --- Sách 7: Khởi Nghiệp Từ Con Số 0 (2 chương) ---
                 Chapter b7_ch1 = Chapter.builder()
                         .chapterNumber(1).title("Chương 1: Ý tưởng đầu tiên")
                         .content("Mọi thứ bắt đầu từ một chiếc bàn gỗ nhỏ trong gara và khoản vốn vỏn vẹn hai mươi " +
@@ -393,8 +370,6 @@ public class ApplicationInitConfig {
                         b7_ch1, b7_ch2
                 ));
 
-                // ================== 5. BOOKSHELVES ==================
-                // Ràng buộc unique(user_id, book_id) — không được trùng cặp user + book
                 Bookshelf shelf1 = Bookshelf.builder().user(reader1).book(book1).status(BookshelfStatus.READING).isFavorite(true).lastReadChapter(b1_ch2).build();
                 Bookshelf shelf2 = Bookshelf.builder().user(reader1).book(book3).status(BookshelfStatus.COMPLETED).isFavorite(true).lastReadChapter(b3_ch2).build();
                 Bookshelf shelf3 = Bookshelf.builder().user(reader1).book(book5).status(BookshelfStatus.READING).isFavorite(false).lastReadChapter(b5_ch1).build();
@@ -407,8 +382,6 @@ public class ApplicationInitConfig {
 
                 bookshelfRepository.saveAll(List.of(shelf1, shelf2, shelf3, shelf4, shelf5, shelf6, shelf7));
 
-                // ================== 6. RATINGS ==================
-                // Ràng buộc unique(user_id, book_id) — mỗi user chỉ được đánh giá 1 sách một lần
                 Rating r1 = Rating.builder().star(5).review("Sách khoa học viễn tưởng hay nhất mình từng đọc!").user(reader1).book(book1).build();
                 Rating r2 = Rating.builder().star(4).review("Cốt truyện hấp dẫn nhưng kết thúc chương 2 hơi vội.").user(reader2).book(book1).build();
                 Rating r3 = Rating.builder().star(5).review("Twist ở chương 3 quá đỉnh, không đoán được luôn.").user(reader3).book(book1).build();
@@ -423,7 +396,6 @@ public class ApplicationInitConfig {
 
                 ratingRepository.saveAll(List.of(r1, r2, r3, r4, r5, r6, r7, r8));
 
-                // ================== 7. COMMENTS (gồm cả bình luận trả lời — reply) ==================
                 Comment c1 = Comment.builder().content("Tác giả viết đoạn này cuốn quá!").user(reader1).chapter(b1_ch1).build();
                 commentRepository.save(c1);
                 Comment c1_reply = Comment.builder().content("Cảm ơn bạn nhé, đọc tiếp chương 2 nha!").user(author1).chapter(b1_ch1).commentParent(c1).build();
@@ -445,8 +417,6 @@ public class ApplicationInitConfig {
                 Comment c5_reply = Comment.builder().content("Chúc bạn khởi nghiệp thành công nhé, cố lên!").user(author2).chapter(b7_ch1).commentParent(c5).build();
                 commentRepository.save(c5_reply);
 
-                // ================== 8. QUIZZES & QUESTIONS ==================
-                // --- Quiz cho Chương 1 - Sách 1 (Hành Trình Vào Vũ Trụ) ---
                 Quiz quiz1 = Quiz.builder().summary("Kiểm tra kiến thức Chương 1 - Khởi hành").chapter(b1_ch1).build();
                 quizRepository.save(quiz1);
 
@@ -456,7 +426,6 @@ public class ApplicationInitConfig {
                 Question q1_4 = Question.builder().content("Con tàu bay qua khu vực nào trong Hệ Mặt Trời?").optionA("Vành đai tiểu hành tinh").optionB("Vành đai Kuiper").optionC("Sao Hỏa").optionD("Mặt Trăng").correctAnswer("A").quiz(quiz1).build();
                 questionRepository.saveAll(List.of(q1_1, q1_2, q1_3, q1_4));
 
-                // --- Quiz cho Chương 1 - Sách 2 (Bí Uẩn Đêm Mưa) ---
                 Quiz quiz2 = Quiz.builder().summary("Kiểm tra kiến thức Chương 1 - Tiếng động lúc nửa đêm").chapter(b2_ch1).build();
                 quizRepository.save(quiz2);
 
@@ -466,7 +435,6 @@ public class ApplicationInitConfig {
                 Question q2_4 = Question.builder().content("Đặc điểm bất thường của hiện trường vụ án là gì?").optionA("Cửa mở toang").optionB("Có dấu chân lạ").optionC("Cửa khóa kín từ bên trong").optionD("Mất tài sản").correctAnswer("C").quiz(quiz2).build();
                 questionRepository.saveAll(List.of(q2_1, q2_2, q2_3, q2_4));
 
-                // --- Quiz cho Chương 1 - Sách 5 (Ngôi Nhà Ma Ám) ---
                 Quiz quiz3 = Quiz.builder().summary("Kiểm tra kiến thức Chương 1 - Căn biệt thự cũ").chapter(b5_ch1).build();
                 quizRepository.save(quiz3);
 
@@ -476,8 +444,7 @@ public class ApplicationInitConfig {
                 Question q3_4 = Question.builder().content("Vì sao không ai dám ở lại căn nhà quá một tháng theo lời người môi giới?").optionA("Nhà quá cũ").optionB("Không có lý do rõ ràng, chỉ được ám chỉ là bất thường").optionC("Giá thuê quá cao").optionD("Không có điện nước").correctAnswer("B").quiz(quiz3).build();
                 questionRepository.saveAll(List.of(q3_1, q3_2, q3_3, q3_4));
 
-                // ================== 9. QUIZ ATTEMPTS & USER ANSWERS ==================
-                // --- reader1 làm quiz1: đúng cả 4 câu -> 100 điểm ---
+
                 QuizAttempt attempt1 = QuizAttempt.builder().score(100).submittedAt(Instant.now()).quiz(quiz1).user(reader1).build();
                 quizAttemptRepository.save(attempt1);
                 userAnswerRepository.saveAll(List.of(
@@ -487,7 +454,6 @@ public class ApplicationInitConfig {
                         UserAnswer.builder().selectedAnswer("A").isCorrect(true).question(q1_4).quizAttempt(attempt1).build()
                 ));
 
-                // --- reader2 làm quiz1: đúng 2/4 câu -> 50 điểm ---
                 QuizAttempt attempt2 = QuizAttempt.builder().score(50).submittedAt(Instant.now().minus(1, ChronoUnit.DAYS)).quiz(quiz1).user(reader2).build();
                 quizAttemptRepository.save(attempt2);
                 userAnswerRepository.saveAll(List.of(
@@ -497,7 +463,7 @@ public class ApplicationInitConfig {
                         UserAnswer.builder().selectedAnswer("B").isCorrect(false).question(q1_4).quizAttempt(attempt2).build()
                 ));
 
-                // --- reader2 làm quiz2: đúng cả 4 câu -> 100 điểm ---
+
                 QuizAttempt attempt3 = QuizAttempt.builder().score(100).submittedAt(Instant.now()).quiz(quiz2).user(reader2).build();
                 quizAttemptRepository.save(attempt3);
                 userAnswerRepository.saveAll(List.of(
@@ -507,7 +473,6 @@ public class ApplicationInitConfig {
                         UserAnswer.builder().selectedAnswer("C").isCorrect(true).question(q2_4).quizAttempt(attempt3).build()
                 ));
 
-                // --- reader1 làm quiz3: đúng 3/4 câu -> 75 điểm ---
                 QuizAttempt attempt4 = QuizAttempt.builder().score(75).submittedAt(Instant.now()).quiz(quiz3).user(reader1).build();
                 quizAttemptRepository.save(attempt4);
                 userAnswerRepository.saveAll(List.of(
@@ -516,10 +481,6 @@ public class ApplicationInitConfig {
                         UserAnswer.builder().selectedAnswer("B").isCorrect(true).question(q3_3).quizAttempt(attempt4).build(),
                         UserAnswer.builder().selectedAnswer("A").isCorrect(false).question(q3_4).quizAttempt(attempt4).build()
                 ));
-
-                // ================== 10. AI CHAT HISTORIES ==================
-                // Lưu ý: entity AIChatHistory hiện yêu cầu chapter bắt buộc (nullable = false),
-                // nên toàn bộ bản ghi mẫu dưới đây đều gắn với 1 chapter cụ thể.
                 AIChatHistory ai1 = AIChatHistory.builder()
                         .question("Tóm tắt chương 1 giúp tôi?")
                         .answer("Chương 1 kể về việc phi hành đoàn tàu Hy Vọng rời Trái Đất vào lúc bình minh, " +

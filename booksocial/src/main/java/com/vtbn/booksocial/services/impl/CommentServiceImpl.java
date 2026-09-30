@@ -62,7 +62,6 @@ public class CommentServiceImpl implements CommentService {
         // Lưu
         commentRepository.save(comment);
 
-        // Entity -> response
         return commentMapper.toCommentDetailResponse(comment);
     }
 
@@ -107,11 +106,6 @@ public class CommentServiceImpl implements CommentService {
         if (parentComment == null) {
             throw new AppException(ErrorCode.COMMENT_NOT_FOUND);
         }
-
-//        // Không cho reply một reply
-//        if (parentComment.getCommentParent() != null) {
-//            throw new AppException(ErrorCode.COMMENT_REPLY_NOT_ALLOWED);
-//        }
 
         // Tạo reply
         Comment reply = commentMapper.toComment(request);

@@ -33,52 +33,28 @@ public class RatingServiceImpl implements RatingService {
 
 
     @Override
-    public RatingDetailResponse createRating(
-            Authentication authentication,
-            int bookId,
-            RatingRequest request
-    ) {
-
-        // 1. Lấy user hiện tại
+    public RatingDetailResponse createRating(Authentication authentication,int bookId,RatingRequest request) {
         String username = authentication.getName();
-
         User user = userRepository.findByUsername(username);
-
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
-        // 2. Kiểm tra book
         Book book = bookRepository.findById(bookId);
 
         if (book == null) {
             throw new AppException(ErrorCode.BOOK_NOT_FOUND);
         }
-        //Kiểm tra trạng thái
         if (book.getStatus() != BookStatus.APPROVED) {
             throw new AppException(ErrorCode.INVALID_BOOK_STATUS);
         }
-        // 3. Kiểm tra user đã rating book này chưa
-        if (ratingRepository.existsByBookIdAndUserId(
-                bookId,
-                user.getId()
-        )) {
+        if (ratingRepository.existsByBookIdAndUserId(bookId,user.getId())) {
             throw new AppException(ErrorCode.RATING_ALREADY_EXISTS);
         }
 
-        // 4. Convert request -> entity
         Rating rating = ratingMapper.toRating(request);
-
-
-        // 5. Gán quan hệ
         rating.setUser(user);
         rating.setBook(book);
-
-
-        // 6. Lưu database
         ratingRepository.save(rating);
-
-
-        // 7. Convert entity -> response
         return ratingMapper.toRatingDetailResponse(rating);
     }
 
@@ -92,99 +68,55 @@ public class RatingServiceImpl implements RatingService {
         if (book == null) {
             throw new AppException(ErrorCode.BOOK_NOT_FOUND);
         }
-
-
         // Lấy rating
         List<Rating> ratings =
                 ratingRepository.findByBookIdOrderByCreatedDateDesc(bookId);
-
-
         // Convert
         return ratings.stream()
                 .map(ratingMapper::toRatingListResponse)
                 .toList();
     }
-
-
     @Override
-    public RatingDetailResponse getMyRating(
-            Authentication authentication,
-            int bookId
-    ) {
-
-        // User hiện tại
+    public RatingDetailResponse getMyRating(Authentication authentication,int bookId) {
         String username = authentication.getName();
-
         User user = userRepository.findByUsername(username);
-
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-
-        // Kiểm tra book
         Book book = bookRepository.findById(bookId);
-
         if (book == null) {
             throw new AppException(ErrorCode.BOOK_NOT_FOUND);
         }
-
-
-        // Tìm rating của user
-        Rating rating =
-                ratingRepository.findByBookIdAndUserId(
-                        bookId,
-                        user.getId()
-                );
+        Rating rating = ratingRepository.findByBookIdAndUserId(bookId,user.getId());
 
         if (rating == null) {
             throw new AppException(ErrorCode.RATING_NOT_FOUND);
         }
-
-
         return ratingMapper.toRatingDetailResponse(rating);
     }
 
 
     @Override
-    public RatingDetailResponse updateRating(
-            Authentication authentication,
-            int ratingId,
-            RatingRequest request
-    ) {
-
-        // User hiện tại
+    public RatingDetailResponse updateRating(Authentication authentication,int ratingId,RatingRequest request) {
         String username = authentication.getName();
-
         User user = userRepository.findByUsername(username);
 
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-
-        // Tìm rating
         Rating rating = ratingRepository.findById(ratingId);
 
         if (rating == null) {
             throw new AppException(ErrorCode.RATING_NOT_FOUND);
         }
-
-
-        // Chỉ owner mới được sửa
         if (rating.getUser().getId() != user.getId()) {
             throw new AppException(ErrorCode.ACCESS_DENIED);
         }
-
-        // Update
         rating.setStar(request.getStar());
         rating.setReview(request.getReview());
-
-
-        // Save
         rating = ratingRepository.save(rating);
-
-
         return ratingMapper.toRatingDetailResponse(rating);
     }
 

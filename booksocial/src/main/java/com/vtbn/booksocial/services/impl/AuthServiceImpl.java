@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service
-//@RequiredArgsConstructor của Lombok giúp tự sinh Constructor cho các field final (hoặc @NonNull).
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
@@ -71,7 +70,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-//      //lấy ra principal, đối tượng đại diện cho user đã được xác thực.
         UserDetails userDetails = (UserDetails)authentication.getPrincipal();
         if(userDetails == null)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -95,17 +93,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse googleLogin(GoogleLoginRequest request) {
         try {
-            //Kiểm tra Google ID Token mà Frontend gửi lên có hợp lệ hay không.
-            //GoogleIdTokenVerifier: Class của thư viện Google API Client, chuyên dùng để xác minh chữ ký + tính hợp lệ của một ID Token do Google phát hành.
-            //verifier gọi ra internet tới Google, lấy public key về, đọc hiểu response JSON đó.
-            //Quan trọng nhất về bảo mật. Chỉ định rằng token hợp lệ chỉ khi claim "aud" (audience) bên trong nó khớp đúng với googleClientId — chính là OAuth Client ID bạn đã đăng ký cho ứng dụng BookSocial trên Google Cloud Console.
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).setAudience(Collections.singletonList(googleClientId)).build();
-            //Kiểm tra tính hợp lệ của Token gửi từ Frontend
             GoogleIdToken idToken = verifier.verify(request.getIdToken());
             if (idToken == null) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
-            //Trích xuất thông tin user từ google payload
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
             String firstName = (String) payload.get("given_name");
@@ -113,7 +105,6 @@ public class AuthServiceImpl implements AuthService {
             String pictureUrl = (String) payload.get("picture");
 
             User user = userRepository.findByEmail(email);
-            //tạo tài khoản mới nếu chưa có
             if (user == null) {
                 String baseUsername = email.split("@")[0];
                 String username = baseUsername;
