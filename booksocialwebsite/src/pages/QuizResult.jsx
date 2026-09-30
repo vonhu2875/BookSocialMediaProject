@@ -11,7 +11,6 @@ export default function QuizResult() {
   const [attempt, setAttempt] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Lấy dữ liệu quiz từ location state hoặc sessionStorage
   const [quiz, setQuiz] = useState(() => {
     if (location.state?.quiz) return location.state.quiz;
     const cached = sessionStorage.getItem('latest_quiz_cache');
@@ -64,7 +63,6 @@ export default function QuizResult() {
     );
   }
 
-  // Tính toán chỉ số điểm số
   const responses = attempt.userAnswerResponses || [];
   const questionsMap = quiz?.questions || [];
   const totalQuestions = quiz?.questions?.length || responses.length;
@@ -91,7 +89,6 @@ export default function QuizResult() {
     navigate(-1);
   };
 
-  // Lấy text của lựa chọn (A, B, C, D)
   const getOptionText = (questionObj, optionLetter) => {
     if (!questionObj || !optionLetter) return null;
     return questionObj[`option${optionLetter.toUpperCase()}`] || null;
@@ -101,7 +98,6 @@ export default function QuizResult() {
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* HEADER */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <button
             onClick={continueReading}
@@ -114,10 +110,8 @@ export default function QuizResult() {
           </span>
         </div>
 
-        {/* BỐ CỤC CHÍNH 2 CỘT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* CỘT 1: THẺ ĐIỂM SỐ (4 CỘT) */}
           <div className="lg:col-span-4 lg:sticky lg:top-6 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 text-center space-y-6 shadow-xl backdrop-blur-sm">
             
             <div className="w-16 h-16 bg-indigo-600/10 border border-indigo-500/30 rounded-2xl flex items-center justify-center mx-auto text-indigo-400">
@@ -129,7 +123,6 @@ export default function QuizResult() {
               <h1 className="text-4xl font-extrabold text-white">{percentage}%</h1>
             </div>
 
-            {/* THỐNG KÊ ĐÚNG / SAI */}
             <div className="grid grid-cols-2 gap-3 pt-2 text-left">
               <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-2xl">
                 <span className="text-[11px] text-slate-400 block">Số câu đúng</span>
@@ -146,7 +139,6 @@ export default function QuizResult() {
               </div>
             </div>
 
-            {/* NÚT HÀNH ĐỘNG */}
             <div className="space-y-2">
               <button
                 onClick={retryQuiz}
@@ -164,7 +156,6 @@ export default function QuizResult() {
 
           </div>
 
-          {/* CỘT 2: CHI TIẾT ĐÁP ÁN (8 CỘT) */}
           <div className="lg:col-span-8 space-y-4">
             
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
@@ -183,7 +174,6 @@ export default function QuizResult() {
                     item.correct ? 'border-emerald-500/30' : 'border-rose-500/30'
                   }`}
                 >
-                  {/* TIÊU ĐỀ CÂU HỎI */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <span className="text-[11px] font-bold text-indigo-400 uppercase">
@@ -203,10 +193,8 @@ export default function QuizResult() {
                     </span>
                   </div>
 
-                  {/* LỰA CHỌN CỦA BẠN & ĐÁP ÁN ĐÚNG */}
                   <div className="space-y-2 text-xs pt-1">
                     
-                    {/* Đáp án đã chọn */}
                     <div className={`p-3 rounded-xl border ${
                       item.correct 
                         ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300' 
@@ -218,7 +206,6 @@ export default function QuizResult() {
                       </span>
                     </div>
 
-                    {/* Đáp án đúng (Chỉ hiển thị khi làm sai) */}
                     {!item.correct && (
                       <div className="p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-emerald-300">
                         <span className="text-emerald-500/80 block text-[10px] mb-0.5">Đáp án đúng:</span>

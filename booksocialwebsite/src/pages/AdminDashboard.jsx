@@ -60,17 +60,15 @@ export default function AdminDashboard() {
   const [savingCategory, setSavingCategory] = useState(false);
   const [error, setError] = useState('');
 
-  // Drawer chi tiết sách
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [bookDetails, setBookDetails] = useState({});
   const [loadingDetailsForBook, setLoadingDetailsForBook] = useState({});
-  const [bookDetailTab, setBookDetailTab] = useState('overview'); // 'overview' | 'chapters' | 'ratings'
-  const [drillChapterId, setDrillChapterId] = useState(null); // chương đang xem bình luận, null = đang ở danh sách chương
+  const [bookDetailTab, setBookDetailTab] = useState('overview'); 
+  const [drillChapterId, setDrillChapterId] = useState(null); 
 
   const errorRef = useRef(null);
   
- // Hàm hỗ trợ cuộn mượt tới khung báo lỗi
   const scrollToError = () => {
     setTimeout(() => {
       errorRef.current?.scrollIntoView({ 
@@ -200,7 +198,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     refreshAdminData();
   }, []);
-  // Cuộn tới lỗi khi state error thay đổi
     useEffect(() => {
       if (error && errorRef.current) {
         scrollToError();
@@ -845,7 +842,6 @@ export default function AdminDashboard() {
         </section>
       )}
 
-      {/* Drawer chi tiết sách */}
       <div className={`fixed inset-0 z-50 ${drawerOpen ? '' : 'pointer-events-none'}`}>
         <div
           onClick={closeDrawer}

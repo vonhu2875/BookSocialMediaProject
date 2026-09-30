@@ -34,7 +34,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-slate-900/5 selection:bg-indigo-500 selection:text-white">
-      {/* Banner Bên Trái */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-slate-950 text-white relative overflow-hidden">
         <div className="absolute -top-10 right-10 w-96 h-96 bg-violet-600/25 rounded-full blur-[130px] pointer-events-none" />
         <div className="absolute bottom-10 -left-10 w-80 h-80 bg-fuchsia-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -65,11 +64,9 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Form Đăng Ký Bên Phải */}
       <div className="flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-2xl shadow-indigo-950/5 border border-slate-100">
           
-          {/* Căn Giữa Tiêu Đề */}
           <div className="text-center">
             <h2 className="text-3xl font-black text-slate-900 tracking-wide">Tạo tài khoản</h2>
             <p className="text-sm text-slate-500 mt-2 font-medium tracking-wide">Trở thành một phần của cộng đồng Readora</p>

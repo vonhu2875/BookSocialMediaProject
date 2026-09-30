@@ -63,7 +63,6 @@ export default function ChapterList({ bookId }) {
         ))}
       </div>
 
-      {/* Phân trang danh sách chương */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 pt-4">
           <button

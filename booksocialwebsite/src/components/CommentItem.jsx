@@ -11,10 +11,8 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
 
   const isMyComment = currentUserId && comment.userId === currentUserId;
 
-  // Lọc tất cả các reply trực tiếp của comment HIỆN TẠI (Tự đệ quy)
   const childReplies = allComments.filter((c) => c.parentCommentId === comment.id);
 
-  // Trả lời bình luận
   const handleReplySubmit = async (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
@@ -31,7 +29,6 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
     }
   };
 
-  // Sửa bình luận
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editText.trim()) return;
@@ -47,7 +44,6 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
     }
   };
 
-  // Xóa bình luận
   const handleDelete = async () => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
     try {
@@ -60,7 +56,6 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
 
   return (
     <div className="space-y-3">
-      {/* Khung nội dung comment */}
       <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -135,7 +130,6 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
           <p className="text-xs sm:text-sm text-slate-300 pl-9">{comment.content}</p>
         )}
 
-        {/* Form Reply */}
         {isReplying && (
           <form onSubmit={handleReplySubmit} className="pl-9 pt-2 flex gap-2">
             <input
@@ -156,7 +150,6 @@ export default function CommentItem({ comment, allComments, currentUserId, onRef
         )}
       </div>
 
-      {/* ĐỆ QUY: Render tiếp các comment con cấp tiếp theo */}
       {childReplies.length > 0 && (
         <div className="pl-4 sm:pl-6 border-l-2 border-indigo-500/30 space-y-3">
           {childReplies.map((reply) => (

@@ -23,7 +23,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   
 
-  // Đóng dropdown khi click ra ngoài màn hình
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -34,7 +33,6 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Xử lý Tìm kiếm
   const handleSearch = (e) => {
     e.preventDefault();
     if (keyword.trim()) {
@@ -44,7 +42,6 @@ export default function Navbar() {
     }
   };
 
-  // Xử lý Đăng xuất
   const handleLogout = async () => {
     await logout();
     setIsDropdownOpen(false);
@@ -56,7 +53,6 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
 
-          {/* 1. Logo & Tên Thương Hiệu */}
           <Link to="/" className="flex items-center space-x-3 shrink-0">
             <div className="w-9 h-9 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center font-black text-lg text-white shadow-md shadow-indigo-500/20">
               R
@@ -66,7 +62,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* 2. Thanh Tìm Kiếm */}
           <form onSubmit={handleSearch} className="flex-1 max-w-md mx-2">
             <div className="relative">
               <input
@@ -80,7 +75,6 @@ export default function Navbar() {
             </div>
           </form>
 
-          {/* 3. Menu Điều Hướng */}
           <div className="flex items-center space-x-1 sm:space-x-3">
             <Link
               to="/"
@@ -119,11 +113,7 @@ export default function Navbar() {
                 </>
             )}
 
-            {/* {user && (
-              
-            )} */}
 
-            {/* Dropdown Profile */}
             <div className="relative ml-2" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}

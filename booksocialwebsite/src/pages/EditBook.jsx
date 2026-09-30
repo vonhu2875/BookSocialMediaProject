@@ -18,7 +18,6 @@ export default function EditBook() {
   const [error, setError] = useState(null);
   const errorRef = useRef(null);
 
-  // Hàm hỗ trợ cuộn mượt tới khung báo lỗi
   const scrollToError = () => {
     setTimeout(() => {
       errorRef.current?.scrollIntoView({ 
@@ -54,7 +53,6 @@ export default function EditBook() {
     if (id) fetchData();
   }, [id]);
 
-  // Cuộn tới lỗi khi state error thay đổi
   useEffect(() => {
     if (error && errorRef.current) {
       scrollToError();

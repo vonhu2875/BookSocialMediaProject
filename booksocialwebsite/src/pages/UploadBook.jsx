@@ -16,7 +16,6 @@ export default function UploadBook() {
   const navigate = useNavigate();
   const errorRef = useRef(null);
 
-  // State Form
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [language, setLanguage] = useState('VIETNAMESE');
@@ -24,7 +23,6 @@ export default function UploadBook() {
   const [coverImage, setCoverImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // State Dữ liệu & UI
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -41,7 +39,6 @@ export default function UploadBook() {
     }, 50);
   };
 
-  //Tải danh sách Thể loại (GET /categories)
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -61,7 +58,6 @@ export default function UploadBook() {
     fetchCategories();
   }, []);
 
-  //Xử lý Chọn/Bỏ chọn Thể loại
   const handleCategoryToggle = (categoryId) => {
     if (selectedCategoryIds.includes(categoryId)) {
       setSelectedCategoryIds(selectedCategoryIds.filter(id => id !== categoryId));
@@ -70,7 +66,6 @@ export default function UploadBook() {
     }
   };
 
-  //Xử lý Chọn File Ảnh
   const handleImageChange = (e) => {
     try {
       const file = e.target.files[0];
@@ -94,7 +89,6 @@ export default function UploadBook() {
     setImagePreview(null);
   };
 
-  //Submit Form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -114,23 +108,19 @@ export default function UploadBook() {
       setSubmitting(true);
       setError(null);
 
-      // Tạo FormData để truyền Multipart
       const formData = new FormData();
       formData.append('title', title.trim());
       if (description.trim()) formData.append('description', description.trim());
       formData.append('language', language);
 
-      // Thêm danh sách Category IDs
       selectedCategoryIds.forEach(id => {
         formData.append('categoryIds', id);
       });
 
-      // Thêm File ảnh bìa
       if (coverImage) {
         formData.append('coverImage', coverImage);
       }
 
-      // Call API POST /books
       await bookService.createBook(formData);
       alert('Đăng sách thành công! Sách của bạn đang chờ Admin duyệt.');
       
@@ -148,7 +138,6 @@ export default function UploadBook() {
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
 
-        {/* Quay lại */}
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition"
@@ -157,7 +146,6 @@ export default function UploadBook() {
           Quay lại
         </button>
 
-        {/* Header */}
         <div className="border-b border-slate-800 pb-4">
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
             <BookPlus className="w-8 h-8 text-emerald-400" />
@@ -177,7 +165,6 @@ export default function UploadBook() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            {/* Cột Trái: Upload Bìa Sách */}
             <div className="md:col-span-1 space-y-2">
               <label className="block text-xs font-bold text-slate-300">
                 Ảnh Bìa Sách
@@ -214,10 +201,8 @@ export default function UploadBook() {
               )}
             </div>
 
-            {/* Cột Phải: Thông tin chính */}
             <div className="md:col-span-2 space-y-4">
               
-              {/* Tên Sách */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">
                   Tên Sách <span className="text-rose-400">*</span>
@@ -232,7 +217,6 @@ export default function UploadBook() {
                 />
               </div>
 
-              {/* Ngôn ngữ */}
               <div>
                 <label htmlFor="book-language" className="block text-xs font-bold text-slate-300 mb-1">
                   Ngôn Ngữ <span className="text-rose-400">*</span>
@@ -252,7 +236,6 @@ export default function UploadBook() {
                 </div>
               </div>
 
-              {/* Thể loại */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-2">
                   Thể Loại <span className="text-rose-400">*</span>
@@ -286,7 +269,6 @@ export default function UploadBook() {
                 )}
               </div>
 
-              {/* Mô tả */}
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">
                   Mô Tả Nội Dung
@@ -303,7 +285,6 @@ export default function UploadBook() {
             </div>
           </div>
 
-          {/* Submit Action */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <button
               type="button"

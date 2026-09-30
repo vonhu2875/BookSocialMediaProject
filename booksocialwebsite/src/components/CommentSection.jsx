@@ -17,7 +17,6 @@ export default function CommentSection({ chapterId }) {
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Phân trang
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
@@ -33,17 +32,6 @@ export default function CommentSection({ chapterId }) {
         authService.getMyInfo().catch(() => null),
       ]);
 
-      /*
-       * Backend trả về Spring Page:
-       *
-       * {
-       *   content: [...],
-       *   totalPages: 3,
-       *   totalElements: 25,
-       *   number: 0,
-       *   size: 10
-       * }
-       */
 
       const pageData = commentsRes;
 
@@ -89,7 +77,6 @@ export default function CommentSection({ chapterId }) {
 
       setNewComment('');
 
-      // Sau khi thêm comment thì quay về trang đầu
       setCurrentPage(0);
       await fetchComments(0);
 
@@ -100,7 +87,6 @@ export default function CommentSection({ chapterId }) {
     }
   };
 
-  // Chuyển trang
   const handlePageChange = (page) => {
     if (page < 0 || page >= totalPages || page === currentPage) {
       return;
@@ -110,7 +96,6 @@ export default function CommentSection({ chapterId }) {
     fetchComments(page);
   };
 
-  // Chỉ lọc các bình luận GỐC
   const rootComments = comments.filter(
     (comment) => !comment.parentCommentId
   );
@@ -118,7 +103,6 @@ export default function CommentSection({ chapterId }) {
   return (
     <div className="space-y-6 pt-8 border-t border-slate-800">
 
-      {/* Tiêu đề */}
       <h3 className="text-base font-bold text-white flex items-center gap-2">
         <MessageSquare className="w-5 h-5 text-indigo-400" />
 
@@ -130,7 +114,6 @@ export default function CommentSection({ chapterId }) {
         )}
       </h3>
 
-      {/* Form tạo bình luận */}
       <form onSubmit={handleCreateComment} className="flex gap-3">
         <input
           type="text"
@@ -155,7 +138,6 @@ export default function CommentSection({ chapterId }) {
         </button>
       </form>
 
-      {/* Loading */}
       {loading ? (
         <div className="flex justify-center py-6 text-slate-500">
           <Loader2 className="w-5 h-5 animate-spin" />
@@ -170,7 +152,6 @@ export default function CommentSection({ chapterId }) {
       ) : (
 
         <>
-          {/* Danh sách bình luận */}
           <div className="space-y-4">
             {rootComments.map((comment) => (
               <CommentItem
@@ -183,11 +164,9 @@ export default function CommentSection({ chapterId }) {
             ))}
           </div>
 
-          {/* Phân trang */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
 
-              {/* Trang trước */}
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 0 || loading}
@@ -196,7 +175,6 @@ export default function CommentSection({ chapterId }) {
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
-              {/* Các số trang */}
               {Array.from(
                 { length: totalPages },
                 (_, index) => index
@@ -215,7 +193,6 @@ export default function CommentSection({ chapterId }) {
                 </button>
               ))}
 
-              {/* Trang sau */}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={

@@ -26,7 +26,6 @@ export default function MyBooks() {
   const [error, setError] = useState(null);
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // 1. Gọi API Lấy Danh Sách Sách Của Tôi: GET /users/books?page=x&size=6
   const fetchMyBooks = async (page = 0) => {
     try {
       setLoading(true);
@@ -51,7 +50,6 @@ export default function MyBooks() {
     fetchMyBooks(0);
   }, []);
 
-  // Xóa sách (DELETE /books/{id})
   const handleDeleteBook = async (bookId, e) => {
     e.preventDefault();
     if (!window.confirm('Bạn có chắc chắn muốn xóa cuốn sách này không?')) return;
@@ -119,7 +117,6 @@ export default function MyBooks() {
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
@@ -163,7 +160,6 @@ export default function MyBooks() {
           ))}
         </div>
 
-        {/* Grid Danh Sách Sách */}
         {filteredBooks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBooks.map((book) => (
@@ -171,7 +167,6 @@ export default function MyBooks() {
                 key={book.id}
                 className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex gap-4 transition duration-200 shadow-xl"
               >
-                {/* Bìa Sách */}
                 <Link to={`/books/${book.id}`} className="shrink-0">
                   <img
                     src={book.coverImage || undefined}
@@ -180,7 +175,6 @@ export default function MyBooks() {
                   />
                 </Link>
 
-                {/* Thông Tin */}
                 <div className="flex-1 flex flex-col justify-between">
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
@@ -227,7 +221,6 @@ export default function MyBooks() {
                     )}
                   </div>
 
-                  {/* Hành Động Quản Lý */}
                   <div className="pt-3 border-t border-slate-800/80 flex items-center gap-2">
                     <Link
                       to={`/books/${book.id}/chapters/create`}
@@ -250,7 +243,6 @@ export default function MyBooks() {
             ))}
           </div>
         ) : (
-          /* Trạng thái trống */
           <div className="text-center py-16 bg-slate-900/40 border border-slate-800 rounded-3xl space-y-4">
             <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto text-slate-500">
               <BookMarked className="w-8 h-8" />
@@ -271,7 +263,6 @@ export default function MyBooks() {
           </div>
         )}
 
-        {/* Phân Trang */}
         {pageInfo.totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 pt-4">
             <button

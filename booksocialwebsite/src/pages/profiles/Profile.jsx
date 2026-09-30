@@ -22,19 +22,16 @@ import {
 export default function Profile() {
   const { user, setUser } = useContext(AuthContext);
 
-  // State Form Thông tin cá nhân
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
-  // State Form Đổi mật khẩu
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // State UI
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [updatingInfo, setUpdatingInfo] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
@@ -42,7 +39,6 @@ export default function Profile() {
   const [infoMessage, setInfoMessage] = useState(null);
   const [passwordMessage, setPasswordMessage] = useState(null);
 
-  // 1. Tải thông tin cá nhân (GET /users/my-info)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -67,7 +63,6 @@ export default function Profile() {
     fetchProfile();
   }, [setUser]);
 
-  // Handle chọn ảnh đại diện
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -80,7 +75,6 @@ export default function Profile() {
     }
   };
 
-  // 2. Cập nhật thông tin cá nhân (PUT /users/my-info)
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setInfoMessage(null);
@@ -109,7 +103,6 @@ export default function Profile() {
     }
   };
 
-  // 3. Đổi mật khẩu (PUT /users/change-password)
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordMessage(null);
@@ -165,7 +158,6 @@ export default function Profile() {
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
 
-        {/* Header */}
         <div className="border-b border-slate-800 pb-4">
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
             <User className="w-8 h-8 text-indigo-500" />
@@ -176,7 +168,6 @@ export default function Profile() {
           </p>
         </div>
 
-        {/* Tổng quan hồ sơ */}
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             {avatarPreview ? (
@@ -234,7 +225,6 @@ export default function Profile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* CỘT TRÁI: Form Cập Nhật Thông Tin Cá Nhân */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -255,7 +245,6 @@ export default function Profile() {
 
               <form onSubmit={handleUpdateProfile} className="space-y-5">
 
-                {/* Avatar Upload */}
                 <div className="flex items-center gap-5">
                   <div className="relative group">
                     {avatarPreview ? (
@@ -281,7 +270,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Username & Email (Chỉ Xem) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 mb-1">Tên Đăng Nhập</label>
@@ -300,7 +288,6 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Họ & Tên */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-300 mb-1">Họ</label>
@@ -350,7 +337,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: Form Đổi Mật Khẩu */}
           <div className="lg:col-span-1">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">

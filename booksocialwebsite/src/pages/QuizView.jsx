@@ -9,7 +9,7 @@ export default function QuizView() {
 	const location = useLocation();
 
   const [quiz, setQuiz] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0); // Quản lý câu hỏi hiện tại (0-based)
+  const [currentIndex, setCurrentIndex] = useState(0); 
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -19,7 +19,6 @@ export default function QuizView() {
 	const isQuizActive = Boolean(quiz) && !submitted && !hasSubmitted.current;
 	const blocker = useBlocker(isQuizActive);
 
-	// 1. Tải bài Quiz cho chapter hiện tại
   useEffect(() => {
     const initQuiz = async () => {
 	      setQuiz(null);
@@ -45,7 +44,6 @@ export default function QuizView() {
     if (chapterId) initQuiz();
 	  }, [chapterId, location.state]);
 
-	// Cảnh báo khi reload, đóng tab hoặc rời trang bằng trình duyệt.
 	useEffect(() => {
 		const handleBeforeUnload = (event) => {
 			if (!isQuizActive) return;
@@ -80,14 +78,12 @@ export default function QuizView() {
 		navigate(-1);
 	};
 
-	// 2. Chọn đáp án, chỉ lưu trong phiên hiện tại
   const handleSelectOption = (questionId, optionValue) => {
     setAnswers((prev) => {
 			return { ...prev, [questionId]: optionValue };
     });
   };
 
-  // 3. Nộp bài
   const handleSubmit = async () => {
     if (!quiz?.questions?.length || submitting) return;
 
@@ -116,7 +112,6 @@ export default function QuizView() {
         throw new Error('API không trả về id của kết quả Quiz.');
       }
       
-      // Dùng replace: true để đè lên trang Quiz trong History Stack
       navigate(`/quiz-attempts/${attemptId}`, { state: { quiz }, replace: true });
     } catch (err) {
       console.error('Lỗi nộp bài:', err);
@@ -154,7 +149,6 @@ export default function QuizView() {
   const currentQuestion = questions[currentIndex];
   const totalQuestions = questions.length;
 
-  // Tính số câu đã trả lời chuẩn xác dựa trên danh sách câu hỏi hiện tại
   const validQuestionIds = new Set(questions.map((q) => String(q.id)));
   const answeredCount = Object.keys(answers).filter((qId) => validQuestionIds.has(String(qId))).length;
 
@@ -169,7 +163,6 @@ export default function QuizView() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between px-4">
       <div className="max-w-6xl mx-auto w-full space-y-6">
         
-        {/* HEADER CỐ ĐỊNH NHƯ TRANG SÁCH */}
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
           <button
 						onClick={handleExit}
@@ -184,16 +177,13 @@ export default function QuizView() {
           </div>
         </div>
 
-        {/* LAYOUT CHÍNH: CỘT BÀI LÀM & CỘT BẢNG ĐIỀU HƯỚNG */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* CỘT 1: THẺ CÂU HỎI CHÍNH (8 CỘT) */}
           <div className="lg:col-span-8 space-y-6">
             
             <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-8 space-y-6 shadow-2xl backdrop-blur-sm min-h-[380px] flex flex-col justify-between">
               
               <div className="space-y-4">
-                {/* THỨ TỰ CÂU HỎI */}
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full">
                     Câu {currentIndex + 1} / {totalQuestions}
@@ -206,13 +196,11 @@ export default function QuizView() {
                   )}
                 </div>
 
-                {/* NỘI DUNG CÂU HỎI */}
                 <h2 className="text-base sm:text-lg font-semibold leading-relaxed text-slate-100">
                   {currentQuestion.content}
                 </h2>
               </div>
 
-              {/* DANH SÁCH LỰA CHỌN */}
               <div className="grid grid-cols-1 gap-3 pt-2">
                 {optionKeys.map(({ key, value }) => {
                   const optionText = currentQuestion[key];
@@ -245,10 +233,8 @@ export default function QuizView() {
 
             </div>
 
-            {/* NÚT CHUYỂN TRANG / NỘP BÀI */}
             <div className="flex items-center justify-between">
               
-              {/* Nút Trước */}
               <button
                 onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
                 disabled={currentIndex === 0}
@@ -257,7 +243,6 @@ export default function QuizView() {
                 <ChevronLeft className="w-4 h-4" /> Trước
               </button>
 
-              {/* Nút Tiếp theo HOẶC Nút Nộp Bài ở câu cuối */}
               {currentIndex < totalQuestions - 1 ? (
                 <button
                   onClick={() => setCurrentIndex((prev) => Math.min(totalQuestions - 1, prev + 1))}
@@ -280,7 +265,6 @@ export default function QuizView() {
 
           </div>
 
-          {/* CỘT 2: BẢNG ĐIỀU HƯỚNG CÂU HỎI (4 CỘT) */}
           <div className="lg:col-span-4 lg:sticky lg:top-6 bg-slate-900/90 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl backdrop-blur-sm">
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -293,7 +277,6 @@ export default function QuizView() {
               </span>
             </div>
 
-            {/* LƯỚI NÚT CHUYỂN CÂU HỎI */}
             <div className="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2 max-h-[320px] overflow-y-auto p-1 scrollbar-thin">
               {questions.map((q, idx) => {
                 const isAnswered = !!answers[q.id];
@@ -319,7 +302,6 @@ export default function QuizView() {
               })}
             </div>
 
-            {/* CHÚ THÍCH MÃ MÀU */}
             <div className="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-[11px] text-slate-400">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/30 border border-emerald-500/50"></span>
@@ -335,7 +317,6 @@ export default function QuizView() {
               </div>
             </div>
 
-            {/* NÚT NỘP BÀI NHANH Ở BẢNG ĐIỀU HƯỚNG */}
             <button
               onClick={handleSubmit}
               disabled={submitting}

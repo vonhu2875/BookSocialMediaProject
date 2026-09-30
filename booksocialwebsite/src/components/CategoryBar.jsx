@@ -32,7 +32,6 @@ export default function CategoryBar({ selectedCategoryIds, onToggleCategory, onC
 
   return (
     <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-none no-scrollbar">
-      {/* Nút Chọn Tất Cả */}
       <button
         onClick={onClearCategories}
         className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition shrink-0 flex items-center gap-2 ${
@@ -45,7 +44,6 @@ export default function CategoryBar({ selectedCategoryIds, onToggleCategory, onC
         Tất Cả Thể Loaị
       </button>
 
-      {/* Danh Sách Thể Loại Trả Về Từ Backend */}
       {categories.map((cat) => {
         const isSelected = selectedCategoryIds.includes(cat.id);
         return (

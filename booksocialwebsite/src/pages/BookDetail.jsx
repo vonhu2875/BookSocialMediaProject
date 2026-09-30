@@ -23,7 +23,7 @@ import {
 export default function BookDetail() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
-  const [chapters, setChapters] = useState([]); // State lưu danh sách chương
+  const [chapters, setChapters] = useState([]); 
   const [ratingSummary, setRatingSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
@@ -40,7 +40,7 @@ export default function BookDetail() {
         const [bookRes, summaryRes, chapterRes] = await Promise.all([
           bookService.getBookDetail(id),
           bookService.getRatingSummary(id).catch(() => null),
-          bookService.getChapterByBookId(id).catch(() => null), // Gọi thêm API danh sách chương
+          bookService.getChapterByBookId(id).catch(() => null), 
         ]);
 
         const bookData = bookRes;
@@ -61,7 +61,6 @@ export default function BookDetail() {
           setIsSaved(shelfData.some((item) => item.bookId === Number(id) || item.id === Number(id)));
           setIsFavorite(favoriteData.some((item) => item.bookId === Number(id) || item.id === Number(id)));
         } catch {
-          // Bỏ qua nếu chưa đăng nhập
         }
       } catch (error) {
         console.error('Lỗi lấy chi tiết sách:', error);
@@ -111,7 +110,6 @@ export default function BookDetail() {
       navigate(`/chapters/${firstChapterId}`);
   };
 
-  // Thao tác Copy Link Chia sẻ
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
@@ -136,14 +134,12 @@ export default function BookDetail() {
     );
   }
 
-  // Lấy ID chương đầu tiên
   const firstChapter = chapters && chapters.length > 0 ? chapters[0] : null;
   const firstChapterId = firstChapter ? (firstChapter.id || firstChapter.chapterId) : book?.firstChapterId;
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6">
       <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row gap-8 shadow-2xl">
-        {/* Ảnh Bìa */}
         <div className="relative aspect-[3/4] w-48 sm:w-60 shrink-0 mx-auto md:mx-0 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700/80 shadow-2xl shadow-indigo-500/10">
           {book.coverImage ? (
             <>
@@ -157,9 +153,7 @@ export default function BookDetail() {
           )}
         </div>
 
-        {/* Thông tin Chi tiết */}
         <div className="flex-1 space-y-4 text-center md:text-left">
-          {/* Thể loại & Trạng thái */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
             {book.categories?.map((cat) => (
               <span key={cat.id} className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md">
@@ -170,7 +164,6 @@ export default function BookDetail() {
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">{book.title}</h1>
 
-          {/* Meta */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-medium text-slate-400">
             {book.authorUsername && book.authorId ? (
               <Link
@@ -210,9 +203,7 @@ export default function BookDetail() {
             {book.description || 'Chưa có mô tả cho cuốn sách này.'}
           </p>
 
-          {/* Cụm Nút Thao Tác */}
           <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
-            {/* Nút Đọc từ đầu */}
             {firstChapterId ? (
               <button
                   onClick={handleReadFromStart}
@@ -231,7 +222,6 @@ export default function BookDetail() {
               </button>
           )}
 
-            {/* Nút Thêm / Bỏ lưu Tủ sách */}
             <button
               onClick={handleToggleBookshelf}
               disabled={saving}
@@ -258,7 +248,6 @@ export default function BookDetail() {
               )}
             </button>
 
-            {/* Nút Lưu sách yêu thích */}
             <button
               onClick={handleToggleFavorite}
               disabled={updatingFavorite}
@@ -277,7 +266,6 @@ export default function BookDetail() {
               )}
             </button>
 
-            {/* Nút Chia sẻ */}
             <button
               onClick={handleShare}
               className="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl transition duration-300"
@@ -289,7 +277,6 @@ export default function BookDetail() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="space-y-6">
         <div className="flex flex-wrap border-b border-slate-800">
           <button

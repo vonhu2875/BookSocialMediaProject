@@ -8,18 +8,15 @@ import { ChevronLeft, ChevronRight, BookOpenText } from 'lucide-react';
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Lấy keyword từ URL (nếu có bấm Tìm kiếm trên Navbar)
   const keywordParam = searchParams.get('keyword') || '';
   const authorIdParam = searchParams.get('authorId') || '';
 
-  // State quản lý danh sách sách và phân trang
   const [books, setBooks] = useState([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Gọi API lấy sách mỗi khi Thể loại, Trạng thái phân trang hoặc Keyword thay đổi
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
@@ -32,7 +29,6 @@ export default function Home() {
           categoryIds: selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
         };
 
-        // Backend trả về Page<BookListResponse>
         const response = await bookService.getBooks(params);
         setBooks(response.content || []);
         setTotalPages(response.totalPages || 0);
@@ -46,14 +42,13 @@ export default function Home() {
     fetchBooks();
   }, [selectedCategoryIds, page, keywordParam, authorIdParam]);
 
-  // Xử lý khi chọn hoặc bỏ chọn một hoặc nhiều thể loại
   const handleToggleCategory = (categoryId) => {
     setSelectedCategoryIds((currentIds) => (
       currentIds.includes(categoryId)
         ? currentIds.filter((id) => id !== categoryId)
         : [...currentIds, categoryId]
     ));
-    setPage(0); // Reset về trang đầu tiên
+    setPage(0); 
   };
 
   const handleClearCategories = () => {
@@ -63,7 +58,6 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      {/* Banner Tiêu Đề Trang */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 p-6 sm:p-10 border border-slate-800 shadow-2xl">
         <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-2xl space-y-3">
@@ -83,7 +77,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bộ Lọc Thể Loại */}
       <div className="space-y-3">
         <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Danh mục thể loại</h2>
         <CategoryBar
@@ -93,7 +86,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Hiển thị Keyword đang tìm nếu có */}
       {keywordParam && (
         <div className="flex items-center justify-between bg-indigo-950/40 border border-indigo-800/40 px-4 py-3 rounded-2xl text-xs sm:text-sm text-indigo-200">
           <span>Kết quả tìm kiếm cho: <strong className="text-white">"{keywordParam}"</strong></span>
@@ -106,10 +98,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Lưới Sách */}
       <BookGrid books={books} loading={loading} />
 
-      {/* Phân Trang (Pagination) */}
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 pt-6 border-t border-slate-800/80">
           <button

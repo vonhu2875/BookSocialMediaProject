@@ -30,14 +30,12 @@ export default function ChapterView() {
   const [chapter, setChapter] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // State phân trang nội dung
   const [currentPage, setCurrentPage] = useState(1);
   const CHARS_PER_PAGE = 800;
 
   const [prevChapter, setPrevChapter] = useState(null);
   const [nextChapter, setNextChapter] = useState(null);
 
-  // AI Drawer State
   const [summary, setSummary] = useState(null);
   const [summarizing, setSummarizing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -52,7 +50,6 @@ export default function ChapterView() {
     'Nêu ý chính tôi cần chú ý khi đọc chương này',
   ];
 
-  // Reading Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('reader_font_size') || 'text-base');
   const [fontFamily, setFontFamily] = useState(() => localStorage.getItem('reader_font_family') || 'font-serif');
@@ -108,7 +105,6 @@ export default function ChapterView() {
     }
   }, [chapterId]);
 
-  // CẮT ĐOẠN VĂN THÀNH TRANG
   const pages = useMemo(() => {
     if (!chapter?.content) return [];
     
@@ -132,13 +128,11 @@ export default function ChapterView() {
     return pageList.length > 0 ? pageList : [chapter.content];
   }, [chapter]);
 
-  // TIẾN ĐỘ ĐỌC TÍNH THEO TRANG (%)
   const readingProgress = useMemo(() => {
     if (pages.length === 0) return 0;
     return Math.round((currentPage / pages.length) * 100);
   }, [currentPage, pages.length]);
 
-  // PHÍM MŨI TÊN SANG TRANG
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowRight' || e.key === 'PageDown') {
@@ -198,7 +192,6 @@ export default function ChapterView() {
     setIsDrawerOpen(true);
   };
 
-  // STYLE CHỈ ÁP DỤNG CHO KHUNG ĐỌC SÁCH
   const getCardThemeClasses = () => {
     switch (theme) {
       case 'sepia':
@@ -253,7 +246,6 @@ export default function ChapterView() {
   return (
     <div className="relative min-h-screen bg-slate-950 text-slate-100 select-none">
       
-      {/* TOPBAR CỐ ĐỊNH */}
       {ReactDOM.createPortal(
         <div className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
           <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -297,7 +289,6 @@ export default function ChapterView() {
         document.body
       )}
 
-      {/* POPOVER SETTINGS */}
       {isSettingsOpen && (
         <div className="fixed top-14 right-4 z-[10000] w-80 bg-slate-900 border border-slate-700/80 rounded-2xl p-5 shadow-2xl text-slate-100 space-y-5 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -409,17 +400,12 @@ export default function ChapterView() {
         </div>
       )}
 
-      {/* MAIN CONTAINER: CHIA GRID 2 CỘT CHO DESKTOP */}
       <main className="max-w-7xl mx-auto pt-2 pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
           
-          {/* CỘT BÊN TRÁI: KHUNG ĐỌC SÁCH (Chiếm 7/12 cột trên Desktop) */}
-          {/* CỘT BÊN TRÁI: KHUNG ĐỌC SÁCH */}
           <section className="lg:col-span-7 xl:col-span-8 space-y-4">
-            {/* Thêm padding px-4 hoặc px-6 cho container ngoài để nút âm không bị tràn khỏi màn hình mobile */}
             <div className="relative min-h-[60vh] flex justify-center px-4 sm:px-6">
               
-              {/* Nút Trái: Kéo ra ngoài lề trái bằng -left-3 hoặc -left-5 */}
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1 && !prevChapter}
@@ -429,7 +415,6 @@ export default function ChapterView() {
                 <ChevronLeft className="w-5 h-5" />
               </button>
 
-              {/* KHUNG THẺ NỘI DUNG SÁCH */}
               <div className={`w-full p-6 sm:p-10 rounded-3xl border transition-all duration-300 ${cardStyle.bg} ${cardStyle.text} ${cardStyle.border} ${cardStyle.shadow}`}>
                 {currentPage === 1 && (
                   <div className="text-center space-y-2 pb-4 mb-6 border-b border-current/10">
@@ -453,7 +438,6 @@ export default function ChapterView() {
                 </div>
               </div>
 
-              {/* Nút Phải: Kéo ra ngoài lề phải bằng -right-3 hoặc -right-5 */}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === pages.length && !nextChapter}
@@ -466,7 +450,6 @@ export default function ChapterView() {
             </div>
           </section>
 
-          {/* CỘT BÊN PHẢI: PHẦN BÌNH LUẬN (Chiếm 5/12 cột trên Desktop, Dính theo màn hình khi cuộn) */}
           <section ref={commentRef} className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-20">
             <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-5 sm:p-6 backdrop-blur-sm shadow-xl">
               <CommentSection chapterId={chapterId} />

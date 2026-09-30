@@ -32,10 +32,9 @@ export default function Bookshelfs() {
   const [favoriteItems, setFavoriteItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterStatus, setFilterStatus] = useState('ALL'); // 'ALL' | 'READING' | 'COMPLETED' | 'FAVORITES'
+  const [filterStatus, setFilterStatus] = useState('ALL'); 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 1. Gọi API Lấy Danh Sách Tủ Sách Thực Tế: GET /users/bookshelfs
   useEffect(() => {
     const fetchBookshelf = async () => {
       try {
@@ -60,7 +59,6 @@ export default function Bookshelfs() {
     fetchBookshelf();
   }, []);
 
-  // 2. Gọi API Xóa Sách Khỏi Tủ Thực Tế: DELETE /books/{bookId}/bookshelfs
   const handleRemoveFromShelf = async (bookId, e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -69,7 +67,6 @@ export default function Bookshelfs() {
 
     try {
       await bookService.removeFromBookshelf(bookId);
-      // Cập nhật lại UI sau khi xóa thành công
       setBookshelfItems(prev => prev.filter(item => item.bookId !== bookId));
     } catch (err) {
       console.error('Lỗi khi xóa khỏi tủ sách:', err);
@@ -90,7 +87,6 @@ export default function Bookshelfs() {
     }
   };
 
-  // Lọc danh sách theo từ khóa & trạng thái
   const filteredBooks = bookshelfItems.filter(item => {
     const title = item.title || '';
     const isCompleted = item.status === 'COMPLETED' || item.completed === true;
@@ -109,7 +105,6 @@ export default function Bookshelfs() {
     getBookTitle(item).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Thống kê
   const totalBooks = bookshelfItems.length;
   const completedCount = bookshelfItems.filter(i => i.status === 'COMPLETED' || i.completed === true).length;
   const readingCount = totalBooks - completedCount;
@@ -127,7 +122,6 @@ export default function Bookshelfs() {
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
 
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
@@ -157,7 +151,6 @@ export default function Bookshelfs() {
           </div>
         )}
 
-        {/* Thống Kê Nhanh */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
@@ -200,7 +193,6 @@ export default function Bookshelfs() {
           </div>
         </div>
 
-        {/* Tabs Filter */}
         <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
           <button
             onClick={() => setFilterStatus('ALL')}
@@ -245,7 +237,6 @@ export default function Bookshelfs() {
           </button>
         </div>
 
-        {/* Grid Danh Sách Sách */}
         {filterStatus === 'FAVORITES' ? (
           filteredFavoriteItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

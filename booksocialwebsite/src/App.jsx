@@ -32,15 +32,12 @@ function ScrollToTop() {
   return null;
 }
 
-// Layout dùng chung cho các trang yêu cầu đăng nhập
 function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 font-sans text-slate-100">
       <ScrollToTop />
-      {/* Navbar cố định phía trên */}
       <Navbar />
       
-      {/* Nội dung thay đổi tùy thuộc vào Route */}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-6 pt-4 sm:px-6 lg:px-8">
         <Outlet />
       </main>
